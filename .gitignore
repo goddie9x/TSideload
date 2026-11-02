@@ -1,0 +1,21 @@
+# Rust build output
+/target/
+**/target/
+
+# Node / frontend (future)
+/node_modules/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# NEVER commit signing material or Apple credentials
+*.p12
+*.mobileprovision
+*.p8
+tsideload-data/
+
+# Editor
+.vscode/
+.idea/
+*.swp

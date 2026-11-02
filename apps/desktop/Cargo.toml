@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["crates/tsideload-core", "crates/tsd"]
+# The Tauri GUI is intentionally excluded: it needs WebView2 (Windows) or
+# WebKit (macOS) and cannot compile on a bare Linux box. Build it on the
+# target OS; see gui/README.md.
+exclude = ["gui/src-tauri"]
+
+[workspace.package]
+edition = "2021"
+license = "AGPL-3.0-or-later"
