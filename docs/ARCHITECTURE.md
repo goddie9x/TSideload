@@ -27,7 +27,9 @@ TSideload/
   Apple provisioning dance: anisette → Apple ID login (+2FA) → development
   certificate → App ID → provisioning profile → re-sign IPA → install over
   usbmuxd. Modules:
-  - `devices` — list USB-connected devices via `idevice::usbmuxd`.
+  - `devices` — list devices via `idevice::usbmuxd`: USB (`usb`) and
+    Wi-Fi (`network:<ip>`) alike. Installs route through usbmuxd either way,
+    so `tsd install` works over Wi-Fi with no code difference.
   - `auth` — `login(apple_id, password, ask_2fa)` → reusable `AppleSession`.
     The caller supplies the 2FA prompt (CLI reads stdin; GUI will show a dialog).
   - `install` — `install_ipa(session, ipa_path, opts)`; picks target device by
@@ -46,7 +48,7 @@ TSideload/
 ### Sign & install flow (desktop)
 
 ```
-iPhone --USB--> usbmuxd --> tsd/tsideload-core
+iPhone --USB or Wi-Fi--> usbmuxd --> tsd/tsideload-core
                                     |
   1. AppleAccount::builder(apple_id) --anisette--> login(password, 2FA cb)
   2. DeveloperSession::from_account()  (fetch/create dev certificate)
@@ -57,6 +59,28 @@ iPhone --USB--> usbmuxd --> tsd/tsideload-core
 
 Free Apple ID limits (Apple's rules): 3 apps, 7-day certificates, no push
 notifications. Re-running install re-signs and refreshes.
+
+#### Wi-Fi installs (no cable)
+
+iOS supports "Sync with this iPhone over Wi-Fi" (Apple Devices / iTunes /
+Finder). Once enabled, usbmuxd sees the iPhone over the LAN and `tsd`
+treats it like a USB device:
+
+- `tsd devices` shows it as `network:<ip>` (vs `usb` for cabled).
+- `tsd install <ipa>` works unchanged — pick by UDID or let it take the
+  first device.
+
+Requirements / caveats:
+
+- **One-time USB setup is mandatory**: connect via cable once, tick
+  "Sync with this iPhone over Wi-Fi" in Apple Devices, tap Trust on the
+  phone. There is no way to enable it purely over Wi-Fi.
+- iPhone and PC must be on the **same Wi-Fi network**.
+- On Windows this needs the Apple Devices app **downloaded from Apple's
+  website** (the Microsoft Store build lacks the mobile-device driver) —
+  `tools/win-installer/install-tsideload.bat` already enforces this.
+- Slower than USB for large IPAs, but fine for the one-time TSideload
+  app install; after that the on-device app takes over.
 
 ### Building
 
