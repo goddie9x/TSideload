@@ -17,3 +17,16 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
 thiserror = "2"
 tracing = "0.1"
+# Platform config dir for storage (replaces the old CWD-relative dir).
+dirs = "6"
+# Direct deps for the imported-certificate (.p12 + .mobileprovision) flow.
+# Versions pinned to match what the `isideload` crate uses so the types
+# (`RsaPrivateKey`, `Certificate`, `ProvisioningProfile`) are identical.
+apple-codesign-quick = "0.1"
+p12-keystore = { version = "0.3.0-rc4", package = "isideload-p12-keystore" }
+rsa = "0.9"
+x509-cert = "0.2"
+plist = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = "0.4"

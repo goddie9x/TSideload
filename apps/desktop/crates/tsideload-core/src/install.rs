@@ -1,6 +1,7 @@
-//! Sign an IPA with the user's Apple ID and install it on a device.
+//! Sign an IPA and install it on a device — either with the user's Apple ID
+//! (free provisioning) or with an imported .p12 + .mobileprovision.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use isideload::sideload::{SideloaderBuilder, TeamSelection};
 use isideload::util::callbacks::{ExtensionsBehaviorCallbackBox, MaxCertsCallbackBox};
@@ -18,15 +19,6 @@ pub struct InstallOptions {
     /// Pass through `isideload`'s increased-memory-limit entitlement hack.
     /// Only needed for specific apps (e.g. JIT-heavy ones); default false.
     pub increased_memory_limit: bool,
-}
-
-/// Where anisette state / certificates are cached. File-based on purpose:
-/// no OS keyring dependency, works the same on Windows/macOS/Linux.
-///
-/// TODO(P1): use the platform config dir (via the `dirs` crate) instead of
-/// the current working directory.
-fn storage_dir() -> PathBuf {
-    PathBuf::from("tsideload-data")
 }
 
 /// Sign `ipa` with the Apple ID behind `session` and install it.
@@ -50,7 +42,7 @@ pub async fn install_ipa(
             session.apple_id,
         )
         .team_selection(TeamSelection::First)
-        .storage(Box::new(FsStorage::new(storage_dir())))
+        .storage(Box::new(FsStorage::new(crate::storage_dir())))
         .machine_name("tsideload-desktop".to_string())
         .build();
 
@@ -66,6 +58,50 @@ pub async fn install_ipa(
         )
         .await
         .map_err(|e| Error::Sideload(format!("{e:?}")))?;
+
+    Ok(())
+}
+
+/// Sign `ipa` with an imported certificate (`--cert <name>`) and install it.
+///
+/// No Apple ID involved: the .p12 password comes from `p12_password`
+/// (CLI: `TSIDELOAD_P12_PASSWORD` env or interactive prompt). The device and
+/// bundle-id checks happen inside [`crate::certs::sign_ipa`].
+///
+/// After install, the device needs one manual step:
+/// Settings > General > VPN & Device Management > trust the certificate.
+pub async fn install_ipa_with_cert(
+    ipa: &Path,
+    cert_name: &str,
+    p12_password: &str,
+    opts: &InstallOptions,
+) -> Result<()> {
+    if !ipa.is_file() {
+        return Err(Error::Io(format!("ipa not found: {}", ipa.display())));
+    }
+    // Resolve the target device first so the provision can be validated
+    // against its UDID before we spend time signing.
+    let devices = crate::devices::list_devices().await?;
+    let udid = match opts.udid.as_deref() {
+        Some(want) => devices
+            .into_iter()
+            .find(|d| d.udid == want)
+            .map(|d| d.udid)
+            .ok_or_else(|| Error::DeviceNotFound(want.to_string()))?,
+        None => devices
+            .into_iter()
+            .next()
+            .map(|d| d.udid)
+            .ok_or(Error::NoDevice)?,
+    };
+
+    let loaded = crate::certs::load_cert(cert_name, p12_password)?;
+    let signed_app_dir = crate::certs::sign_ipa(ipa, &loaded, &udid).await?;
+
+    let provider = find_provider(Some(&udid)).await?;
+    isideload::sideload::install::install_app(&provider, &signed_app_dir, |_| {})
+        .await
+        .map_err(|e| Error::Sideload(format!("install failed: {e:?}")))?;
 
     Ok(())
 }

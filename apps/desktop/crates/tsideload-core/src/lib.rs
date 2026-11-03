@@ -13,7 +13,10 @@ pub mod devices;
 pub mod install;
 
 pub use auth::{AppleSession, TwoFactorAnswer, TwoFactorPrompt};
+pub use certs::ImportedCertMeta;
 pub use devices::DeviceInfo;
+
+use std::path::PathBuf;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -29,7 +32,7 @@ pub enum Error {
     /// Apple ID login / developer session failed.
     #[error("login failed: {0}")]
     Login(String),
-    /// User-provided signing certificate problems (P1: import not implemented yet).
+    /// User-provided signing certificate problems.
     #[error("certificate error: {0}")]
     Cert(String),
     /// Local I/O problems (missing IPA, unreadable files, ...).
@@ -38,6 +41,34 @@ pub enum Error {
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+/// Directory for tsideload state: Apple-ID session cache, imported
+/// certificates, etc.
+///
+/// Uses the platform config dir
+/// (Linux `~/.config/tsideload`, Windows `%APPDATA%/tsideload`,
+/// macOS `~/Library/Application Support/tsideload`).
+/// If the legacy `./tsideload-data` directory (used before P1) already
+/// exists in the current working directory, it keeps being used and a
+/// deprecation warning is printed — existing installs don't break.
+pub fn storage_dir() -> PathBuf {
+    let legacy = PathBuf::from("tsideload-data");
+    if legacy.is_dir() {
+        eprintln!(
+            "warning: using legacy storage dir ./tsideload-data (deprecated); \
+             move it to {} to silence this",
+            default_storage_dir().display()
+        );
+        return legacy;
+    }
+    default_storage_dir()
+}
+
+fn default_storage_dir() -> PathBuf {
+    dirs::config_dir()
+        .map(|d| d.join("tsideload"))
+        .unwrap_or_else(|| PathBuf::from("tsideload-data"))
+}
 
 /// Initialize global state: rustls crypto provider + `isideload` error-reporting
 /// hooks. Idempotent — safe to call more than once.
