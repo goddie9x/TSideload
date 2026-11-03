@@ -8,7 +8,9 @@
   var strings = {};
   var lang = localStorage.getItem("tsideload-lang") || "en";
   var devicesCache = [];
+  var certsCache = [];
   var lastStage = null;   // {stage, detail} — re-rendered on language change
+  var lastMethod = "apple_id"; // signing method used by the running install
   var twofaPrompt = null; // last 2FA prompt DTO — re-rendered on language change
 
   function $(id) { return document.getElementById(id); }
@@ -37,6 +39,7 @@
     });
     document.documentElement.lang = lang;
     renderDeviceOptions();
+    renderCertOptions();
     renderStage();
     if (twofaPrompt) renderTwofa();
   }
@@ -113,6 +116,50 @@
     sel.value = stillThere ? cur : "";
   }
 
+  // ---- imported certificates ----
+
+  function onMethodChange() {
+    var useCert = $("sign_method").value === "cert";
+    $("cert_wrap").hidden = !useCert;
+    $("appleid_wrap").hidden = useCert;
+    if (useCert) refreshCerts();
+  }
+
+  function refreshCerts() {
+    var sel = $("cert_name");
+    if (!isTauri()) { certsCache = []; renderCertOptions(); return; }
+    tauriCore().invoke("list_certs").then(function (certs) {
+      certsCache = certs || [];
+      renderCertOptions();
+    }).catch(function (e) {
+      certsCache = [];
+      renderCertOptions();
+      setMsg(t("install.error", { msg: String(e) }), "err");
+    });
+  }
+
+  function renderCertOptions() {
+    var sel = $("cert_name");
+    if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = "";
+    if (!certsCache.length) {
+      var o = document.createElement("option");
+      o.value = "";
+      o.textContent = t("certs.none");
+      sel.appendChild(o);
+      return;
+    }
+    certsCache.forEach(function (c) {
+      var o = document.createElement("option");
+      o.value = c.name;
+      o.textContent = c.name + " — " + c.profile_name + " (exp " + c.expires_rfc3339.slice(0, 10) + ")";
+      sel.appendChild(o);
+    });
+    var stillThere = certsCache.some(function (c) { return c.name === cur; });
+    sel.value = stillThere ? cur : certsCache[0].name;
+  }
+
   // ---- install ----
 
   function onBrowse() {
@@ -139,11 +186,38 @@
     if (!ev) { setMsg(t("install.no_backend"), "err"); return; }
     var ipa = $("ipa_path").value.trim();
     if (!ipa) { setMsg(t("install.no_ipa"), "err"); return; }
-    var appleId = $("apple_id").value.trim();
-    var pwEl = $("apple_password");
-    var password = pwEl.value;
-    pwEl.value = ""; // never keep the password in the DOM
-    if (!appleId || !password) { setMsg(t("install.no_credentials"), "err"); return; }
+    var req;
+    if ($("sign_method").value === "cert") {
+      var certName = $("cert_name").value;
+      var p12El = $("p12_password");
+      var p12pw = p12El.value;
+      p12El.value = ""; // never keep the password in the DOM
+      if (!certName) { setMsg(t("install.no_cert"), "err"); return; }
+      lastMethod = "cert";
+      req = {
+        apple_id: "", password: "",
+        ipa_path: ipa,
+        udid: $("target_device").value || null,
+        increased_memory_limit: $("mem_limit").checked,
+        cert_name: certName,
+        p12_password: p12pw
+      };
+    } else {
+      var appleId = $("apple_id").value.trim();
+      var pwEl = $("apple_password");
+      var password = pwEl.value;
+      pwEl.value = ""; // never keep the password in the DOM
+      if (!appleId || !password) { setMsg(t("install.no_credentials"), "err"); return; }
+      lastMethod = "apple_id";
+      req = {
+        apple_id: appleId, password: password,
+        ipa_path: ipa,
+        udid: $("target_device").value || null,
+        increased_memory_limit: $("mem_limit").checked,
+        cert_name: null,
+        p12_password: null
+      };
+    }
 
     var btn = $("do_install");
     btn.disabled = true;
@@ -152,13 +226,7 @@
     renderStage();
 
     // Single struct arg: Tauri matches it by parameter name (`req`).
-    core.invoke("install_ipa", { req: {
-      apple_id: appleId,
-      password: password,
-      ipa_path: ipa,
-      udid: $("target_device").value || null,
-      increased_memory_limit: $("mem_limit").checked
-    }}).catch(function (e) {
+    core.invoke("install_ipa", { req: req }).catch(function (e) {
       // The backend already emitted an "error" stage on the normal path;
       // this only fires for failures before any stage was emitted.
       if (!lastStage || lastStage.stage !== "error") {
@@ -174,9 +242,9 @@
     var el = $("progress");
     var s = stage || lastStage;
     if (!s) { el.hidden = true; return; }
-    if (s.stage === "done") {
+    if (s.stage === "done" || s.stage === "done_cert") {
       el.hidden = true;
-      setMsg(t("install.success"), "ok");
+      setMsg(t(lastMethod === "cert" ? "install.success_cert" : "install.success"), "ok");
       return;
     }
     if (s.stage === "error") {
@@ -258,6 +326,7 @@
   $("refresh").addEventListener("click", refreshDevices);
   $("browse").addEventListener("click", onBrowse);
   $("do_install").addEventListener("click", onInstall);
+  $("sign_method").addEventListener("change", onMethodChange);
   $("twofa_submit").addEventListener("click", function () {
     answerTwofa({ kind: "code", code: $("twofa_code").value.trim() });
   });
@@ -268,6 +337,7 @@
   });
   $("twofa_abort").addEventListener("click", function () { answerTwofa({ kind: "abort" }); });
 
+  onMethodChange();
   loadLang(lang);
   subscribeEvents();
   // Re-apply device list after strings load.

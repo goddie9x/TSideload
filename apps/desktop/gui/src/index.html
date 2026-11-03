@@ -77,10 +77,21 @@
       <span data-i18n="install.method">Signing method</span>
       <select id="sign_method">
         <option value="apple_id" data-i18n="install.method_apple_id">Apple ID</option>
-        <option value="cert" data-i18n="install.method_cert" disabled>Imported certificate</option>
+        <option value="cert" data-i18n="install.method_cert">Imported certificate</option>
       </select>
     </label>
-    <p class="hint" data-i18n="certs.not_implemented">Certificate import is not implemented yet (P1).</p>
+    <div id="cert_wrap" hidden>
+      <label>
+        <span data-i18n="certs.select">Certificate</span>
+        <select id="cert_name"></select>
+      </label>
+      <label>
+        <span data-i18n="certs.p12_password">.p12 password</span>
+        <input type="password" id="p12_password" autocomplete="off">
+      </label>
+      <p class="hint" data-i18n="certs.import_hint">Import one with: tsd import-cert --p12 cert.p12 --provision app.mobileprovision</p>
+    </div>
+    <div id="appleid_wrap">
     <label>
       <span data-i18n="auth.apple_id">Apple ID (email)</span>
       <input type="email" id="apple_id" autocomplete="username">
@@ -89,6 +100,7 @@
       <span data-i18n="auth.password">Password</span>
       <input type="password" id="apple_password" autocomplete="current-password">
     </label>
+    </div>
     <p class="hint" data-i18n="install.password_hint"></p>
     <label class="check">
       <input type="checkbox" id="mem_limit">

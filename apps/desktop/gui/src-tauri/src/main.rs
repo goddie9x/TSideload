@@ -1,10 +1,13 @@
 //! TSideload desktop GUI.
 //!
-//! `list_devices` lists USB devices. `install_ipa` runs the full install
-//! flow: Apple ID login (2FA is mediated by the `tsideload://twofa-prompt`
-//! event + the `twofa_answer` command), then sign + install via
-//! `tsideload-core`. Coarse progress goes out as `tsideload://install-stage`
-//! events (`login` / `signing` / `done` / `error`).
+//! `list_devices` lists USB devices. `list_certs` lists imported .p12
+//! certificates (metadata only). `install_ipa` runs the full install flow:
+//! either Apple ID login (2FA is mediated by the `tsideload://twofa-prompt`
+//! event + the `twofa_answer` command) or, when `req.cert_name` is set,
+//! KSign-style signing with an imported certificate (no Apple ID, no 2FA).
+//! Then sign + install via `tsideload-core`. Coarse progress goes out as
+//! `tsideload://install-stage` events (`login` / `signing` / `done` /
+//! `done_cert` / `error`).
 //!
 //! Build note: this crate is excluded from the workspace and needs
 //! WebView2 (Windows) / WebKit (macOS). It has never been compiled on the
@@ -45,6 +48,11 @@ struct InstallRequest {
     ipa_path: String,
     udid: Option<String>,
     increased_memory_limit: bool,
+    /// KSign-style flow: when set (non-empty), Apple ID login is skipped and
+    /// the IPA is signed with this imported certificate instead. The .p12
+    /// password is only used for this call and never stored.
+    cert_name: Option<String>,
+    p12_password: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -158,6 +166,14 @@ async fn list_devices() -> Result<Vec<DeviceDto>, String> {
     Ok(devices.into_iter().map(DeviceDto::from).collect())
 }
 
+/// Imported certificates (metadata only, no secrets). Used to populate the
+/// "Imported certificate" signing method in the GUI.
+#[tauri::command]
+async fn list_certs() -> Result<Vec<tsideload_core::certs::ImportedCertMeta>, String> {
+    tsideload_core::init();
+    tsideload_core::certs::list_certs().map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 async fn install_ipa(
     app: AppHandle,
@@ -171,6 +187,32 @@ async fn install_ipa(
         udid: req.udid.clone(),
         increased_memory_limit: req.increased_memory_limit,
     };
+
+    // KSign-style flow: imported certificate, no Apple ID, no 2FA.
+    if let Some(cert_name) = req.cert_name.clone().filter(|s| !s.trim().is_empty()) {
+        let p12_password = req.p12_password.clone().unwrap_or_default();
+        drop(req); // clear any credential strings promptly
+        emit_stage(&app, "signing", Some(cert_name.clone()));
+        let result = tsideload_core::install::install_ipa_with_cert(
+            &ipa_path,
+            &cert_name,
+            &p12_password,
+            &install_opts,
+        )
+        .await;
+        // No 2FA bridge was armed on this path; nothing to clear.
+        return match result {
+            Ok(()) => {
+                emit_stage(&app, "done_cert", None);
+                Ok("installed".to_string())
+            }
+            Err(e) => {
+                let msg = e.to_string();
+                emit_stage(&app, "error", Some(msg.clone()));
+                Err(msg)
+            }
+        };
+    }
 
     // The password lives only in this call: moved into `login` below, never
     // logged, never emitted. (The frontend clears its field on submit.)
@@ -264,6 +306,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             list_devices,
+            list_certs,
             install_ipa,
             twofa_answer
         ])
