@@ -1,0 +1,50 @@
+# Build the unsigned TSideload iOS app (SideStore fork) into an IPA.
+#
+# Trigger: MANUAL ONLY (workflow_dispatch). macOS runners bill 10x minutes
+# and a full build takes ~15-25 min, so this never runs on push.
+#
+# Output: TSideload-unsigned.ipa as a run artifact. It is NOT signed with a
+# real identity (CODE_SIGNING_ALLOWED=NO + ldid fakesign) — install it onto
+# the iPhone with the desktop tool, which signs it for real:
+#   tsd install TSideload-unsigned.ipa --apple-id <burner>
+# That first install needs a PC (iOS limitation). After that, the app runs
+# on-device: install IPAs directly on the phone and self-refresh via the
+# local VPN loopback, no PC needed.
+name: build-ios-ipa
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install ldid (fakesign tool)
+        run: brew install ldid
+
+      - name: Build archive (unsigned)
+        run: make build
+
+      - name: Fakesign
+        run: make fakesign
+
+      - name: Package IPA
+        run: |
+          make ipa
+          mv SideStore.ipa TSideload-unsigned.ipa
+          ls -la TSideload-unsigned.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: TSideload-unsigned
+          path: apps/ios/TSideload-unsigned.ipa
+          retention-days: 30
