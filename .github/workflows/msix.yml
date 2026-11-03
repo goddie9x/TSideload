@@ -15,9 +15,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version X.Y.Z (sẽ thành X.Y.Z.0 trong manifest; X phải ≠ 0 theo quy tắc MSIX)"
+        description: "Version X.Y.Z (sẽ thành X.Y.Z.0 trong manifest; mỗi phần 0-65535, cấm 0.0.0)"
         required: true
-        default: "1.0.0"
+        default: "0.1.0" # khớp version trong apps/desktop/gui/src-tauri/tauri.conf.json
   push:
     tags: ["msix-v*"]
 
@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # pin: stable @ 2026-11-04
 
       - name: Resolve version
         run: |
@@ -61,9 +61,10 @@ jobs:
           if (-not $v) { $v = '0.1.0' }
           if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "version phải dạng X.Y.Z, nhận được: $v" }
           $parts = $v -split '\.'
-          if ([int]$parts[0] -eq 0 -or ($parts | Where-Object { [int]$_ -gt 65535 })) {
-            throw "mỗi phần version phải 0-65535, phần đầu ≠ 0"
+          if (($parts | Where-Object { [int]$_ -gt 65535 })) {
+            throw "mỗi phần version phải 0-65535 (MSIX cho phép major = 0)"
           }
+          if ($v -eq '0.0.0') { throw "version 0.0.0 không hợp lệ cho MSIX (makeappx từ chối 0.0.0.0)" }
           "MSIX_VERSION=$v.0" >> $env:GITHUB_ENV
           "RESOLVED_VERSION=$v" >> $env:GITHUB_ENV
           "Đóng gói MSIX version: $v.0"
