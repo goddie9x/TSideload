@@ -28,7 +28,8 @@ env:
   WORKING_DIR: "apps/desktop/gui"
   # Build Tauri GUI (frontend là file tĩnh, không cần npm build) rồi stage
   # exe + WebView2Loader.dll vào msix-app/
-  BUILD_COMMAND: "if (-not (Get-Command tauri -ErrorAction SilentlyContinue)) { cargo install tauri-cli --version '^2' --locked }; cd src-tauri; tauri build --no-bundle; New-Item -ItemType Directory -Force ../msix-app | Out-Null; Copy-Item target/release/tsideload-gui.exe ../msix-app/; Get-ChildItem target/release/*.dll -ErrorAction SilentlyContinue | Copy-Item -Destination ../msix-app/ -Force"
+  # cargo install đặt binary tên `cargo-tauri` (gọi qua `cargo tauri`), không phải `tauri`
+  BUILD_COMMAND: "if (-not (Get-Command cargo-tauri -ErrorAction SilentlyContinue)) { cargo install tauri-cli --version '^2' --locked }; cd src-tauri; cargo tauri build --no-bundle; New-Item -ItemType Directory -Force ../msix-app | Out-Null; Copy-Item target/release/tsideload-gui.exe ../msix-app/; Get-ChildItem target/release/*.dll -ErrorAction SilentlyContinue | Copy-Item -Destination ../msix-app/ -Force"
   APP_DIR: "msix-app"
   EXE_NAME: "tsideload-gui.exe"
   PROCESSOR_ARCHITECTURE: "x64"
