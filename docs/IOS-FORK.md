@@ -126,6 +126,30 @@ rebranded **TSideload**. Full provenance in `apps/ios/ATTRIBUTION.md`.
 - `make build fakesign ipa` produces a release IPA (see vendored `AGENTS.md`).
 - **Real iPhone required** for any meaningful test (iPhone 13 available);
   target iOS 15+.
-- CI (GitHub Actions macOS runner) for unsigned IPA builds: later, P1.
+- CI (GitHub Actions macOS runner) for unsigned IPA builds: **done**
+  (workflow `build-ios-ipa`, manual dispatch — macOS minutes bill 10x).
+  Two CI quirks fixed 2026-11-03: (1) `make fakesign` needs
+  `SideBackup.ipa` staged into `SideStore.app/` first — upstream's pinned
+  Xcode 27.2 does this via the Resources phase, other versions don't, so the
+  workflow copies `build/SideBackup.ipa` explicitly; (2) the vendored
+  Makefile hardcodes `ORG_IDENTIFIER=com.SideStore` on the xcodebuild
+  command line, overriding `Build.xcconfig` — set to `dev.hmt9x` so CI
+  builds carry the real bundle ID.
 - Never commit: pairing files, `.p12`/certificates, private keys, anisette
   data, Apple IDs/passwords, device UDIDs.
+
+## Release builds
+
+Built IPAs are stored on the user's Google Drive
+(`hoangminhtam7991@gmail.com`) in the **"My iOS Creation"** folder —
+unsigned/fakesigned, install once via the desktop tool
+(`tsd install <file>.ipa --apple-id <burner>`), which signs with the real
+Apple ID. After that first install the app is self-sufficient on-device.
+
+- **2026-11-03** — `TSideload-unsigned-2026-11-03.ipa` (29.7 MB):
+  [Drive link](https://drive.google.com/file/d/1wfog4xu7wFl-fPDF5wnaumlZzZPjL9z7/view?usp=drivesdk) ·
+  bundle `dev.hmt9x.tsideload`, app name TSideload, version 0.7.0 ·
+  built from CI run
+  [41592959982](https://github.com/goddie9x/TSideload/actions/runs/41592959982)
+  (commit `f0cda55`). Verified: `SideBackup.ipa` present inside the bundle,
+  `CFBundleIdentifier` correct.
