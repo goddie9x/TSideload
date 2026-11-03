@@ -33,6 +33,16 @@ jobs:
       - name: Build archive (unsigned)
         run: make build
 
+      - name: Stage SideBackup.ipa into app bundle
+        # Upstream's shipped IPAs contain SideBackup.ipa inside SideStore.app
+        # (their pinned Xcode 27.2 copies it via the Resources phase; other
+        # Xcode versions don't, which breaks `make fakesign`). Stage it
+        # explicitly so the layout is deterministic on any runner.
+        run: |
+          test -f build/SideBackup.ipa || { echo "build/SideBackup.ipa missing — the 'Build SideBackup.ipa' build phase did not produce it"; exit 1; }
+          cp build/SideBackup.ipa SideStore.xcarchive/Products/Applications/SideStore.app/SideBackup.ipa
+          ls -la SideStore.xcarchive/Products/Applications/SideStore.app/SideBackup.ipa
+
       - name: Fakesign
         run: make fakesign
 
