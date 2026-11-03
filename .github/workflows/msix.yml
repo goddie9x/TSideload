@@ -1,0 +1,166 @@
+# Build Tauri GUI cho Windows rồi đóng gói MSIX (không publish lên Store).
+#
+# Copy từ gh-actions-templates/workflows/msix-desktop-standalone.yml,
+# thêm bước setup Rust + build Tauri GUI (repo PUBLIC nên phải standalone).
+#
+# Trigger: workflow_dispatch (nhập version X.Y.Z) hoặc push tag `msix-v*`.
+# Kết quả: artifact "tsideload-<version>.msix" (unsigned — Store tự re-sign
+# khi nộp; cài local thì self-sign + Developer Mode).
+# KHÔNG tự publish lên Microsoft Store — bro tự upload tay lên Partner Center
+# (lưu ý: tool sideload IPA có thể rớt certification).
+#
+name: MSIX
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version X.Y.Z (sẽ thành X.Y.Z.0 trong manifest)"
+        required: true
+        default: "0.1.0"
+  push:
+    tags: ["msix-v*"]
+
+env:
+  APP_NAME: "TSideload"
+  PACKAGE_PREFIX: "tsideload"
+  DESCRIPTION: "Sideload IPA to iPhone from Windows"
+  WORKING_DIR: "apps/desktop/gui"
+  # Build Tauri GUI (frontend là file tĩnh, không cần npm build) rồi stage
+  # exe + WebView2Loader.dll vào msix-app/
+  BUILD_COMMAND: "if (-not (Get-Command tauri -ErrorAction SilentlyContinue)) { cargo install tauri-cli --version '^2' --locked }; cd src-tauri; tauri build --no-bundle; New-Item -ItemType Directory -Force ../msix-app | Out-Null; Copy-Item target/release/tsideload-gui.exe ../msix-app/; Get-ChildItem target/release/*.dll -ErrorAction SilentlyContinue | Copy-Item -Destination ../msix-app/ -Force"
+  APP_DIR: "msix-app"
+  EXE_NAME: "tsideload-gui.exe"
+  PROCESSOR_ARCHITECTURE: "x64"
+  # Identity Partner Center (View app identity details).
+  # Để trống = placeholder CN=Dev — chỉ test local, nộp Store thì điền thật.
+  MSIX_IDENTITY_NAME: ""
+  MSIX_PUBLISHER: ""
+  MSIX_PUBLISHER_DISPLAY_NAME: ""
+  MSIX_ASSETS_DIR: ""
+
+jobs:
+  msix:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Resolve version
+        run: |
+          $v = '${{ github.event.inputs.version }}'
+          if ('${{ github.ref_type }}' -eq 'tag') { $v = '${{ github.ref_name }}' -replace '^msix-v', '' }
+          if (-not $v) { $v = '0.1.0' }
+          if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "version phải dạng X.Y.Z, nhận được: $v" }
+          $parts = $v -split '\.'
+          if ([int]$parts[0] -eq 0 -or ($parts | Where-Object { [int]$_ -gt 65535 })) {
+            throw "mỗi phần version phải 0-65535, phần đầu ≠ 0"
+          }
+          "MSIX_VERSION=$v.0" >> $env:GITHUB_ENV
+          "RESOLVED_VERSION=$v" >> $env:GITHUB_ENV
+          "Đóng gói MSIX version: $v.0"
+
+      - name: Build app
+        run: ${{ env.BUILD_COMMAND }}
+
+      - name: Verify build output
+        run: |
+          $exe = Join-Path '${{ env.APP_DIR }}' '${{ env.EXE_NAME }}'
+          if (-not (Test-Path $exe)) { throw "không thấy exe sau build: $exe" }
+          "Tìm thấy: $exe"
+
+      - name: Stage MSIX
+        run: |
+          $stage = "msix_stage"
+          if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
+          New-Item -ItemType Directory $stage | Out-Null
+          Copy-Item (Join-Path '${{ env.APP_DIR }}' '*') $stage -Recurse -Force
+
+          $identityName = '${{ env.MSIX_IDENTITY_NAME }}'
+          $publisher = '${{ env.MSIX_PUBLISHER }}'
+          $publisherDisplay = '${{ env.MSIX_PUBLISHER_DISPLAY_NAME }}'
+          if (-not $identityName) { $identityName = "dev.placeholder.${{ env.PACKAGE_PREFIX }}" }
+          if (-not $publisher) { $publisher = "CN=Dev" }
+          if (-not $publisherDisplay) { $publisherDisplay = '${{ env.APP_NAME }}' }
+          if ($identityName -notmatch '^[A-Za-z0-9\.\-]+$') {
+            throw "MSIX_IDENTITY_NAME chỉ chấp nhận chữ, số, dấu chấm, gạch ngang: $identityName"
+          }
+          if ($publisher -eq 'CN=Dev') {
+            "::warning::Dùng placeholder identity — MSIX này chỉ để test local, nộp Store thì điền msix-* từ Partner Center"
+          }
+          $esc = { param($s) [System.Security.SecurityElement]::Escape([string]$s) }
+          $appNameEsc = & $esc '${{ env.APP_NAME }}'
+          $descEsc = & $esc '${{ env.DESCRIPTION }}'
+          $publisherEsc = & $esc $publisher
+          $publisherDisplayEsc = & $esc $publisherDisplay
+
+          $assetsDir = '${{ env.MSIX_ASSETS_DIR }}'
+          New-Item -ItemType Directory (Join-Path $stage 'Assets') -Force | Out-Null
+          if ($assetsDir -and (Test-Path $assetsDir)) {
+            Copy-Item (Join-Path $assetsDir '*') (Join-Path $stage 'Assets') -Recurse -Force
+          } else {
+            Add-Type -AssemblyName System.Drawing
+            $logos = @{ 'StoreLogo.png' = 50; 'Square44x44Logo.png' = 44; 'Square150x150Logo.png' = 150 }
+            foreach ($kv in $logos.GetEnumerator()) {
+              $bmp = New-Object System.Drawing.Bitmap($kv.Value, $kv.Value)
+              $g = [System.Drawing.Graphics]::FromImage($bmp)
+              $g.Clear([System.Drawing.Color]::FromArgb(0, 90, 158))
+              $g.Dispose()
+              $bmp.Save((Join-Path $stage "Assets/$($kv.Key)"), [System.Drawing.Imaging.ImageFormat]::Png)
+              $bmp.Dispose()
+            }
+          }
+
+          $manifest = @"
+          <?xml version="1.0" encoding="utf-8"?>
+          <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+                   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+                   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
+            <Identity Name="$identityName" Publisher="$publisherEsc" Version="$env:MSIX_VERSION" ProcessorArchitecture="${{ env.PROCESSOR_ARCHITECTURE }}"/>
+            <Properties>
+              <DisplayName>$appNameEsc</DisplayName>
+              <PublisherDisplayName>$publisherDisplayEsc</PublisherDisplayName>
+              <Description>$descEsc</Description>
+              <Logo>Assets\StoreLogo.png</Logo>
+            </Properties>
+            <Resources><Resource Language="en-us"/></Resources>
+            <Dependencies>
+              <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0"/>
+            </Dependencies>
+            <Capabilities>
+              <rescap:Capability Name="runFullTrust"/>
+            </Capabilities>
+            <Applications>
+              <Application Id="App" Executable="${{ env.EXE_NAME }}" EntryPoint="Windows.FullTrustApplication">
+                <uap:VisualElements DisplayName="$appNameEsc" Description="$descEsc" BackgroundColor="transparent"
+                  Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png"/>
+              </Application>
+            </Applications>
+          </Package>
+          "@
+          $manifest | Out-File (Join-Path $stage 'AppxManifest.xml') -Encoding utf8
+
+      - name: Pack MSIX (makeappx)
+        run: |
+          $makeappx = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin\*\x64\makeappx.exe' |
+            Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $makeappx) { throw "không tìm thấy makeappx.exe trên runner" }
+          "Dùng: $makeappx"
+          $out = "${{ env.PACKAGE_PREFIX }}-${{ env.RESOLVED_VERSION }}.msix"
+          & $makeappx pack /d msix_stage /p $out /o /v
+          if ($LASTEXITCODE -ne 0) { throw "makeappx pack thất bại (exit $LASTEXITCODE)" }
+          Get-ChildItem $out
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_PREFIX }}-${{ env.RESOLVED_VERSION }}-msix
+          path: ${{ env.WORKING_DIR }}/${{ env.PACKAGE_PREFIX }}-${{ env.RESOLVED_VERSION }}.msix
+          if-no-files-found: error
