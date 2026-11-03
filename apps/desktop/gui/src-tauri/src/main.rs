@@ -1,13 +1,27 @@
-//! TSideload desktop GUI (Tauri shell — scaffold).
+//! TSideload desktop GUI.
 //!
-//! `list_devices` is wired to `tsideload-core`. The install flow needs an
-//! interactive Apple ID + 2FA dialog and is P1; until then the command
-//! below reports that honestly instead of half-working.
+//! `list_devices` lists USB devices. `install_ipa` runs the full install
+//! flow: Apple ID login (2FA is mediated by the `tsideload://twofa-prompt`
+//! event + the `twofa_answer` command), then sign + install via
+//! `tsideload-core`. Coarse progress goes out as `tsideload://install-stage`
+//! events (`login` / `signing` / `done` / `error`).
+//!
+//! Build note: this crate is excluded from the workspace and needs
+//! WebView2 (Windows) / WebKit (macOS). It has never been compiled on the
+//! Linux dev VM (no webkit2gtk) — P1b was written by careful reading only.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use serde::Serialize;
-use tsideload_core::DeviceInfo;
+use std::path::PathBuf;
+use std::sync::{mpsc, Arc, Mutex};
+
+use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Emitter, Manager, State};
+use tsideload_core::{DeviceInfo, TwoFactorAnswer, TwoFactorPrompt};
+
+// ---------------------------------------------------------------------------
+// DTOs
+// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize)]
 struct DeviceDto {
@@ -24,6 +38,117 @@ impl From<DeviceInfo> for DeviceDto {
     }
 }
 
+#[derive(Debug, Deserialize)]
+struct InstallRequest {
+    apple_id: String,
+    password: String,
+    ipa_path: String,
+    udid: Option<String>,
+    increased_memory_limit: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
+struct TrustedNumberDto {
+    id: u32,
+    number: String,
+}
+
+/// What the frontend 2FA dialog receives. Mirrors
+/// `tsideload_core::TwoFactorPrompt` (minus `selected_number_id`, which the
+/// UI does not need).
+#[derive(Debug, Clone, Serialize)]
+struct TwoFactorPromptDto {
+    sms: bool,
+    unknown: bool,
+    numbers: Vec<TrustedNumberDto>,
+    last_error: Option<String>,
+}
+
+impl From<&TwoFactorPrompt> for TwoFactorPromptDto {
+    fn from(p: &TwoFactorPrompt) -> Self {
+        TwoFactorPromptDto {
+            sms: p.sms,
+            unknown: p.unknown,
+            numbers: p
+                .numbers
+                .iter()
+                .map(|n| TrustedNumberDto {
+                    id: n.id,
+                    number: n.number.clone(),
+                })
+                .collect(),
+            last_error: p.last_error.clone(),
+        }
+    }
+}
+
+/// Answer from the frontend 2FA dialog. Same contract as the `tsd` CLI:
+/// when the prompt had `unknown` set, the frontend never offers code entry —
+/// only method selection / abort reach the backend in that state.
+#[derive(Debug, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+enum TwoFactorAnswerDto {
+    Code { code: String },
+    Resend,
+    SendToDevices,
+    SendSms { number_id: u32 },
+    Abort,
+}
+
+impl From<TwoFactorAnswerDto> for TwoFactorAnswer {
+    fn from(a: TwoFactorAnswerDto) -> Self {
+        match a {
+            TwoFactorAnswerDto::Code { code } => TwoFactorAnswer::Code(code),
+            TwoFactorAnswerDto::Resend => TwoFactorAnswer::Resend,
+            TwoFactorAnswerDto::SendToDevices => TwoFactorAnswer::SendToDevices,
+            TwoFactorAnswerDto::SendSms { number_id } => TwoFactorAnswer::SendSms(number_id),
+            TwoFactorAnswerDto::Abort => TwoFactorAnswer::Abort,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+struct InstallStage {
+    stage: String,
+    detail: Option<String>,
+}
+
+// ---------------------------------------------------------------------------
+// 2FA bridge. The core's `login` needs a *blocking* prompt callback, but the
+// answer comes from the webview: the callback stores a oneshot sender, emits
+// an event, and blocks on `recv()` (std mpsc — no Tokio involvement, safe
+// inside `block_in_place`). `twofa_answer` delivers the user's answer.
+// Single-flight: the Install button is disabled while an install runs.
+// ---------------------------------------------------------------------------
+
+struct TwofaBridge {
+    app: AppHandle,
+    slot: Mutex<Option<mpsc::Sender<TwoFactorAnswer>>>,
+}
+
+/// Bridge of the currently running install, if any.
+struct PendingTwofa(Mutex<Option<Arc<TwofaBridge>>>);
+
+fn clear_pending(pending: &PendingTwofa) {
+    if let Ok(mut guard) = pending.0.lock() {
+        *guard = None;
+    }
+}
+
+fn emit_stage(app: &AppHandle, stage: &str, detail: Option<String>) {
+    let _ = app.emit(
+        "tsideload://install-stage",
+        InstallStage {
+            stage: stage.to_string(),
+            detail,
+        },
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Commands
+// ---------------------------------------------------------------------------
+
 #[tauri::command]
 async fn list_devices() -> Result<Vec<DeviceDto>, String> {
     tsideload_core::init();
@@ -33,25 +158,115 @@ async fn list_devices() -> Result<Vec<DeviceDto>, String> {
     Ok(devices.into_iter().map(DeviceDto::from).collect())
 }
 
-/// P1: full install flow (Apple ID + password + 2FA dialog) lives here.
-/// The core already exposes everything needed:
-/// `auth::login` + `install::install_ipa`.
 #[tauri::command]
 async fn install_ipa(
-    _apple_id: String,
-    _password: String,
-    _ipa_path: String,
-    _udid: Option<String>,
+    app: AppHandle,
+    pending: State<'_, PendingTwofa>,
+    req: InstallRequest,
 ) -> Result<String, String> {
-    Err(
-        "Install from the GUI is not wired yet (P1). Use `tsd install` for now."
-            .to_string(),
-    )
+    tsideload_core::init();
+
+    let ipa_path = PathBuf::from(&req.ipa_path);
+    let install_opts = tsideload_core::install::InstallOptions {
+        udid: req.udid.clone(),
+        increased_memory_limit: req.increased_memory_limit,
+    };
+
+    // The password lives only in this call: moved into `login` below, never
+    // logged, never emitted. (The frontend clears its field on submit.)
+    let bridge = Arc::new(TwofaBridge {
+        app: app.clone(),
+        slot: Mutex::new(None),
+    });
+    pending
+        .0
+        .lock()
+        .map_err(|e| format!("internal state error: {e}"))?
+        .replace(bridge.clone());
+
+    emit_stage(&app, "login", Some(req.apple_id.clone()));
+
+    let ask = {
+        let bridge = Arc::clone(&bridge);
+        Arc::new(move |prompt: TwoFactorPrompt| -> TwoFactorAnswer {
+            let (tx, rx) = mpsc::channel();
+            match bridge.slot.lock() {
+                Ok(mut slot) => *slot = Some(tx),
+                Err(_) => return TwoFactorAnswer::Abort,
+            }
+            let _ = bridge
+                .app
+                .emit("tsideload://twofa-prompt", TwoFactorPromptDto::from(&prompt));
+            // `login` runs this via `block_in_place`, so blocking the thread
+            // here is safe. A dropped sender (superseded install) aborts.
+            rx.recv().unwrap_or(TwoFactorAnswer::Abort)
+        })
+    };
+
+    let session = match tsideload_core::auth::login(&req.apple_id, &req.password, ask).await {
+        Ok(s) => s,
+        Err(e) => {
+            clear_pending(&pending);
+            let msg = e.to_string();
+            emit_stage(&app, "error", Some(msg.clone()));
+            return Err(msg);
+        }
+    };
+    // `req` — and the password with it — is dropped here.
+    drop(req);
+
+    emit_stage(&app, "signing", None);
+    // NOTE: fine-grained (byte-level) progress needs core support —
+    // `install::install_ipa` currently takes no progress callback — so the
+    // GUI reports coarse stages instead of a real progress bar.
+    let result = tsideload_core::install::install_ipa(session, &ipa_path, &install_opts).await;
+    clear_pending(&pending);
+    match result {
+        Ok(()) => {
+            emit_stage(&app, "done", None);
+            Ok("installed".to_string())
+        }
+        Err(e) => {
+            let msg = e.to_string();
+            emit_stage(&app, "error", Some(msg.clone()));
+            Err(msg)
+        }
+    }
+}
+
+#[tauri::command]
+async fn twofa_answer(
+    pending: State<'_, PendingTwofa>,
+    answer: TwoFactorAnswerDto,
+) -> Result<(), String> {
+    let bridge = pending
+        .0
+        .lock()
+        .map_err(|e| format!("internal state error: {e}"))?
+        .clone()
+        .ok_or_else(|| "no install in progress".to_string())?;
+    let tx = bridge
+        .slot
+        .lock()
+        .map_err(|e| format!("internal state error: {e}"))?
+        .take()
+        .ok_or_else(|| "no pending 2FA prompt".to_string())?;
+    tx.send(TwoFactorAnswer::from(answer))
+        .map_err(|_| "2FA prompt already answered".to_string())
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![list_devices, install_ipa])
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            app.manage(PendingTwofa(Mutex::new(None)));
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            list_devices,
+            install_ipa,
+            twofa_answer
+        ])
         .run(tauri::generate_context!())
         .expect("failed to run TSideload GUI");
 }

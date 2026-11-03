@@ -1,8 +1,14 @@
-# TSideload GUI (Tauri shell — scaffold)
+# TSideload GUI (Tauri shell)
 
-Graphical frontend for `tsideload-core`. **Status: scaffold (P0).**
-`list_devices` is wired; the install flow (Apple ID + 2FA dialog) is P1 —
-use `tsd install` until then.
+Graphical frontend for `tsideload-core`. **Status: install flow wired (P1b).**
+`list_devices` lists USB devices; the install section picks an IPA (via
+`tauri-plugin-dialog`), logs in with an Apple ID (2FA dialog follows the
+`tsd` CLI contract — no code entry when Apple leaves the method `unknown`),
+then signs + installs with coarse stage events (`login`/`signing`/`done`/
+`error`). Imported-certificate signing is still P1 (the method selector shows
+it disabled, honestly).
+
+The password field is cleared on submit and never logged or emitted.
 
 ## Why it is not in the workspace
 
