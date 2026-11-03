@@ -15,9 +15,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version X.Y.Z (sẽ thành X.Y.Z.0 trong manifest)"
+        description: "Version X.Y.Z (sẽ thành X.Y.Z.0 trong manifest; X phải ≠ 0 theo quy tắc MSIX)"
         required: true
-        default: "0.1.0"
+        default: "1.0.0"
   push:
     tags: ["msix-v*"]
 
