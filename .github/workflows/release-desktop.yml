@@ -1,0 +1,88 @@
+# Release the desktop CLI (`tsd`) as a downloadable zip.
+#
+# Trigger: push a tag like `desktop-v1.0.0` (do NOT push tags casually —
+# each tag creates a public GitHub Release).
+#
+# The Windows asset MUST be named exactly `tsd-x86_64-pc-windows-msvc.zip`
+# because tools/win-installer/install-tsideload.bat downloads
+# https://github.com/goddie9x/TSideload/releases/latest/download/tsd-x86_64-pc-windows-msvc.zip
+
+name: release-desktop
+
+on:
+  push:
+    tags:
+      - "desktop-v*"
+
+permissions:
+  contents: write # create Release + upload assets
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows:
+    name: tsd for Windows x86_64
+    runs-on: windows-latest # 2x minutes — keep this job lean
+    defaults:
+      run:
+        working-directory: apps/desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop
+
+      - name: Build tsd (release)
+        run: cargo build --release -p tsd
+
+      - name: Package zip (exact asset name required by install-tsideload.bat)
+        shell: pwsh
+        run: |
+          Compress-Archive -Path target/release/tsd.exe `
+            -DestinationPath tsd-x86_64-pc-windows-msvc.zip -Force
+          Get-ChildItem tsd-x86_64-pc-windows-msvc.zip
+
+      - name: Create Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/desktop/tsd-x86_64-pc-windows-msvc.zip
+          # default: full release (not prerelease) so that
+          # /releases/latest/download/ resolves to it
+
+  build-linux:
+    name: tsd for Linux x86_64
+    runs-on: ubuntu-latest # 1x minutes
+    defaults:
+      run:
+        working-directory: apps/desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop
+
+      - name: Build tsd (release)
+        run: cargo build --release -p tsd
+
+      - name: Package zip
+        run: |
+          mkdir -p dist
+          cp target/release/tsd dist/
+          cd dist && zip -9 ../tsd-x86_64-unknown-linux-gnu.zip tsd
+          cd .. && ls -la tsd-x86_64-unknown-linux-gnu.zip
+
+      - name: Upload asset to the same Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/desktop/tsd-x86_64-unknown-linux-gnu.zip

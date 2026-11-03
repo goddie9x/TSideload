@@ -1,0 +1,37 @@
+# Validate the iOS Xcode project on every change under apps/ios/.
+#
+# This does NOT do a full build (macOS runners cost 10x minutes).
+# It verifies:
+#   1. project.pbxproj parses (xcodebuild -list fails on syntax errors)
+#   2. the `vi` localization is registered in knownRegions
+#   3. vi.lproj/Localizable.strings is a well-formed strings file
+
+name: ios-validate
+
+on:
+  push:
+    paths:
+      - "apps/ios/**"
+  pull_request:
+    paths:
+      - "apps/ios/**"
+
+jobs:
+  validate:
+    name: Validate Xcode project
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse project and list targets
+        run: xcodebuild -list -project apps/ios/AltStore.xcodeproj
+
+      - name: Check vi localization is registered
+        run: |
+          grep -qE '^[[:space:]]+vi,$' apps/ios/AltStore.xcodeproj/project.pbxproj \
+            || { echo "::error::'vi' missing from knownRegions in project.pbxproj"; exit 1; }
+          echo "vi found in knownRegions"
+
+      - name: Lint vi.lproj strings file
+        run: |
+          plutil -lint apps/ios/AltStore/Resources/vi.lproj/Localizable.strings

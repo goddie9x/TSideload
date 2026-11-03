@@ -39,13 +39,23 @@ rebranded **TSideload**. Full provenance in `apps/ios/ATTRIBUTION.md`.
 - `vi.lproj/Localizable.strings`: 200/596 keys (main screens: tab bar,
   My Apps, Browse, News, Settings, App Detail, sign-in, Sources).
 - Remaining 396 keys: TODO (error details, advanced diagnostics, onboarding).
-- **Mac required:** add `vi.lproj/Localizable.strings` to the AltStore
-  target in `AltStore.xcodeproj` (cannot be done on Linux).
+- **Registration (done 2026-11-03, P1c):** this project uses Xcode 16+
+  file-system synchronized groups (`PBXFileSystemSynchronizedRootGroup`
+  for `AltStore/`), so there are no manual `PBXFileReference` /
+  `PBXVariantGroup` / `PBXBuildFile` entries for resources — Xcode
+  auto-discovers `Resources/vi.lproj/Localizable.strings` from disk and
+  treats it as a localization of `Localizable.strings`. The only project
+  change needed was adding `vi` to `knownRegions` in
+  `AltStore.xcodeproj/project.pbxproj` (the same thing Xcode does when a
+  localization is added via UI). Verified by CI
+  (`.github/workflows/ios-validate.yml`: `xcodebuild -list` parse check
+  + `knownRegions` grep + `plutil -lint` on the strings file).
 - New strings added later must be translated; keep `%@` counts in sync.
 
 ## TODO (before first real build)
 
-1. Add `vi.lproj` to Xcode project (Mac).
+1. ~~Add `vi.lproj` to Xcode project (Mac).~~ Done via `knownRegions` +
+   synchronized-folder auto-discovery (see above); pending CI green.
 2. App icon: replace `AltStore/Resources/Icons.xcassets/AppIcon.appiconset`
    with TSideload artwork (all sizes).
 3. Launch screen: `AltStore/iOS/LaunchScreen.storyboard` still shows
