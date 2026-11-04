@@ -10,7 +10,7 @@ description = "Core sideloading logic for TSideload desktop (wraps the isideload
 # default-features disabled to avoid the OS keyring dependency; we use
 # file-based storage (fs-storage) instead. `install` pulls in idevice.
 isideload = { git = "https://github.com/nab138/isideload", rev = "326e56229d0727cb6e7b34c8cf03e37e2cd3e17d", default-features = false, features = ["install", "fs-storage", "tokio-mt"] }
-idevice = { version = "0.1.68", default-features = false, features = ["usbmuxd", "ring"] }
+idevice = { version = "0.1.68", default-features = false, features = ["usbmuxd", "ring", "house_arrest"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 # Matches the rustls version isideload uses; needed to install the default
 # crypto provider (reqwest is built with rustls-no-provider upstream).

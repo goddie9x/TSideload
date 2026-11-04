@@ -11,6 +11,7 @@ pub mod auth;
 pub mod certs;
 pub mod devices;
 pub mod install;
+pub mod pairing;
 
 pub use auth::{AppleSession, TwoFactorAnswer, TwoFactorPrompt};
 pub use certs::ImportedCertMeta;

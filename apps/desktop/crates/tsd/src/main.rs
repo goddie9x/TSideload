@@ -5,6 +5,7 @@
 //! tsd install app.ipa --apple-id you@example.com [--udid <UDID>]
 //! tsd install app.ipa --cert mycert [--udid <UDID>]
 //! tsd import-cert --p12 cert.p12 --provision app.mobileprovision [--name mycert]
+//! tsd export-pairing [--udid <UDID>] [--output pairing.mobiledevicepairing]
 //! ```
 
 use std::io::{self, Write};
@@ -50,6 +51,16 @@ enum Cmd {
         /// Name to store it under (default: .p12 file stem)
         #[arg(long)]
         name: Option<String>,
+    },
+    /// Export the device's pairing record as a .mobiledevicepairing plist
+    /// (for manual transfer to the iPhone, or debugging)
+    ExportPairing {
+        /// Target device UDID (default: first connected device)
+        #[arg(long)]
+        udid: Option<String>,
+        /// Where to write the file (default: ./TSideloadPairing.mobiledevicepairing)
+        #[arg(long)]
+        output: Option<PathBuf>,
     },
 }
 
@@ -100,6 +111,7 @@ async fn run(cmd: Cmd) -> tsideload_core::Result<()> {
                 };
                 tsideload_core::install::install_ipa_with_cert(&ipa, &cert_name, &password, &opts)
                     .await?;
+                push_pairing_best_effort(opts.udid.as_deref()).await;
                 println!("Done. On the device: Settings > General > VPN & Device Management > trust the certificate.");
                 return Ok(());
             }
@@ -119,6 +131,7 @@ async fn run(cmd: Cmd) -> tsideload_core::Result<()> {
                 increased_memory_limit: false,
             };
             tsideload_core::install::install_ipa(session, &ipa, &opts).await?;
+            push_pairing_best_effort(opts.udid.as_deref()).await;
             println!("Done. On the device: Settings > General > VPN & Device Management > trust your Apple ID.");
             Ok(())
         }
@@ -153,6 +166,28 @@ async fn run(cmd: Cmd) -> tsideload_core::Result<()> {
                 }
             }
         }
+        Cmd::ExportPairing { udid, output } => {
+            let out = output
+                .unwrap_or_else(|| PathBuf::from(tsideload_core::pairing::PAIRING_FILENAME));
+            let plist = tsideload_core::pairing::export_pairing_plist(udid.as_deref()).await?;
+            std::fs::write(&out, &plist)
+                .map_err(|e| tsideload_core::Error::Io(format!("cannot write {}: {e}", out.display())))?;
+            println!("Wrote pairing file to {}", out.display());
+            println!("Transfer it to the iPhone (Files app) and pick it in the TSideload app,");
+            println!("or let `tsd install` push it automatically next time.");
+            Ok(())
+        }
+    }
+}
+
+/// Best-effort pairing-file push after a successful install: warn and
+/// continue on failure — the install itself already succeeded.
+async fn push_pairing_best_effort(udid: Option<&str>) {
+    match tsideload_core::pairing::push_pairing_for_udid(udid).await {
+        Ok(()) => println!("Pairing file pushed to the TSideload app on the device."),
+        Err(e) => eprintln!(
+            "warning: could not push pairing file ({e}) — import it manually in the app if needed."
+        ),
     }
 }
 

@@ -153,6 +153,18 @@ fn emit_stage(app: &AppHandle, stage: &str, detail: Option<String>) {
     );
 }
 
+/// Best-effort pairing-file push after a successful install: warn (stderr)
+/// and continue — the install itself already succeeded. The iOS app
+/// self-imports the pushed file on first launch; if the push failed the
+/// user can still import the file manually.
+async fn push_pairing_best_effort(udid: Option<&str>) {
+    if let Err(e) = tsideload_core::pairing::push_pairing_for_udid(udid).await {
+        eprintln!(
+            "warning: could not push pairing file ({e}) — import it manually in the app if needed."
+        );
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Commands
 // ---------------------------------------------------------------------------
@@ -190,6 +202,7 @@ async fn install_ipa(
 
     // KSign-style flow: imported certificate, no Apple ID, no 2FA.
     if let Some(cert_name) = req.cert_name.clone().filter(|s| !s.trim().is_empty()) {
+        let udid = req.udid.clone();
         let p12_password = req.p12_password.clone().unwrap_or_default();
         drop(req); // clear any credential strings promptly
         emit_stage(&app, "signing", Some(cert_name.clone()));
@@ -203,6 +216,7 @@ async fn install_ipa(
         // No 2FA bridge was armed on this path; nothing to clear.
         return match result {
             Ok(()) => {
+                push_pairing_best_effort(udid.as_deref()).await;
                 emit_stage(&app, "done_cert", None);
                 Ok("installed".to_string())
             }
@@ -265,6 +279,7 @@ async fn install_ipa(
     clear_pending(&pending);
     match result {
         Ok(()) => {
+            push_pairing_best_effort(install_opts.udid.as_deref()).await;
             emit_stage(&app, "done", None);
             Ok("installed".to_string())
         }

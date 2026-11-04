@@ -167,6 +167,9 @@ public enum AppConstants {
         public static let legacyPairingFileName     = "ALTPairingFile.mobiledevicepairing"
         public static let lockdownPairingFileName   = "PairingFile_Lockdown.plist"
         public static let remotePairingFileName     = "PairingFile_RemoteRP.plist"
+        /// One-shot handoff file the desktop tool pushes into Documents via AFC.
+        /// Imported automatically on first launch, then removed.
+        public static let autoImportDropFileName    = "TSideloadPairing.mobiledevicepairing"
         public static let documentationURL          = AppConstants.URLs.pairingDocumentation
     }
 

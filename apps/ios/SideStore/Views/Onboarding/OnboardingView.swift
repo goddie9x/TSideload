@@ -196,8 +196,32 @@ private struct PairingFileStep: View {
     @State private var hasPairingFile = PairingFileManager.shared.hasPairingFile()
     @State private var isShowingFilePicker = false
     @State private var errorMessage: String? = nil
+    @State private var didAttemptAutoImport = false
 
     private let contentTypes: [UTType] = PairingFileManager.supportedContentTypes
+
+    /// Imports the pairing file pushed by the desktop tool (via AFC into
+    /// Documents) without asking the user to pick it manually.
+    /// Runs once per view appearance; falls back to the manual picker on failure.
+    private func attemptAutoImportIfNeeded() {
+        guard !didAttemptAutoImport else { return }
+        didAttemptAutoImport = true
+        guard !PairingFileManager.shared.hasPairingFile() else { return }
+        let dropURL = FileManager.default.documentsDirectory
+            .appendingPathComponent(AppConstants.Pairing.autoImportDropFileName)
+        guard FileManager.default.fileExists(atPath: dropURL.path) else { return }
+        do {
+            try PairingFileManager.shared.importPairingFile(from: dropURL)
+            // One-shot handoff: remove the drop file so a later explicit
+            // pairing reset isn't silently undone by a stale file.
+            try? FileManager.default.removeItem(at: dropURL)
+            hasPairingFile = true
+            errorMessage = nil
+            onNext()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 
     var body: some View {
         VStack(spacing: 24) {
@@ -320,6 +344,7 @@ private struct PairingFileStep: View {
             }
         }
         #endif
+        .onAppear(perform: self.attemptAutoImportIfNeeded)
     }
 }
 
