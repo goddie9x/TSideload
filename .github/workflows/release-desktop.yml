@@ -86,3 +86,33 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: apps/desktop/tsd-x86_64-unknown-linux-gnu.zip
+
+  build-gui-windows:
+    name: TSideload GUI (Tauri) for Windows x86_64
+    runs-on: windows-latest # 2x minutes
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/gui/src-tauri
+
+      - name: Install tauri-cli
+        run: cargo install tauri-cli --version "^2" --locked
+
+      # No frontend build step: the GUI is static HTML/JS
+      # (tauri.conf.json: frontendDist = ../src, beforeBuildCommand = "").
+      - name: Build Tauri app (NSIS + MSI)
+        working-directory: apps/desktop/gui
+        run: cargo tauri build
+
+      - name: Upload GUI bundles to the same Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            apps/desktop/gui/src-tauri/target/release/bundle/nsis/TSideload_*_x64-setup.exe
+            apps/desktop/gui/src-tauri/target/release/bundle/msi/TSideload_*_x64_en-US.msi
