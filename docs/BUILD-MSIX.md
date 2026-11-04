@@ -127,8 +127,9 @@ gồm 3 workflow):
 
 1. **Identity thật** (Name / Publisher) lấy từ **Partner Center → Product
    management → View app identity details** **sau** khi tạo app trên Store.
-   Hiện tại mọi manifest/test dùng placeholder `CN=Dev` — khi có identity
-   thật, thay `Publisher` trong manifest và pack lại.
+   Đã wire vào workflow (`msix.yml`): `goddie9x.TSideload` /
+   `CN=8633D8C8-01ED-4486-B41B-1CD6E3B8F80D` / `goddie9x` (04/11) —
+   bản manual release dùng identity này, ký tay trước khi đăng tải.
 2. **Version 4 phần**, phần cuối = 0 (vd `0.1.0.0`); mỗi submission phải tăng
    version.
 3. **Không cần mua code-signing cert:** nộp gói **unsigned** lên Store,
