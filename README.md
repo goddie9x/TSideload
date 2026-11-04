@@ -67,6 +67,26 @@ Free Apple IDs are limited by Apple (not by us): **3 sideloaded apps**,
 certificates expire after **7 days** — re-run `tsd install` to refresh.
 No push notifications with free signing.
 
+## iOS app (on-device, no PC needed after first install)
+
+1. Download **TSideload-unsigned.ipa** from the latest
+   [`ios-v*` release](https://github.com/goddie9x/TSideload/releases/tag/ios-v0.7.0).
+2. Install it **once** with the desktop tool (this signs it with your Apple ID):
+   ```sh
+   tsd install TSideload-unsigned.ipa --apple-id you@example.com
+   ```
+   Get `tsd` from the latest [`desktop-v*` release](https://github.com/goddie9x/TSideload/releases)
+   — no Rust needed.
+3. On the iPhone: enable **Developer Mode** (Settings > Privacy & Security,
+   one-time + restart, required by Apple on iOS 16+ for sideloaded apps),
+   then trust the Apple ID under Settings > General > VPN & Device Management.
+4. From now on, open the TSideload app to install IPAs and refresh them
+   **directly on the phone** — no PC needed.
+
+> Note: Developer Mode is an official Apple feature, not jailbreak — but a
+> few banking apps with aggressive security SDKs may refuse to run while it
+> is on. If one does, toggle Developer Mode off (restart) while using it.
+
 ## License
 
 AGPL-3.0-or-later. See [LICENSE](LICENSE).
@@ -130,6 +150,27 @@ tsd install /path/to/app.ipa --apple-id you@example.com
 Giới hạn của Apple ID miễn phí (do Apple đặt, không phải do tool): tối đa
 **3 app**, chứng chỉ hết hạn sau **7 ngày** — chạy lại `tsd install` để gia hạn.
 Ký miễn phí thì không có push notification.
+
+## App iOS (trên máy, sau lần đầu không cần PC nữa)
+
+1. Tải **TSideload-unsigned.ipa** từ bản
+   [`ios-v*` mới nhất](https://github.com/goddie9x/TSideload/releases/tag/ios-v0.7.0).
+2. Cài **1 lần duy nhất** bằng tool desktop (lúc này nó ký bằng Apple ID của bạn):
+   ```sh
+   tsd install TSideload-unsigned.ipa --apple-id you@example.com
+   ```
+   Lấy `tsd` từ bản [`desktop-v*` mới nhất](https://github.com/goddie9x/TSideload/releases)
+   — không cần cài Rust.
+3. Trên iPhone: bật **Developer Mode** (Cài đặt > Quyền riêng tư & Bảo mật,
+   làm 1 lần + khởi động lại — Apple bắt buộc từ iOS 16 cho app sideload),
+   rồi trust Apple ID trong Cài đặt > Cài đặt chung > VPN & Quản lý thiết bị.
+4. Từ đây mở app TSideload là cài IPA và tự gia hạn **ngay trên điện thoại**
+   — khỏi cần PC nữa.
+
+> Lưu ý: Developer Mode là tính năng chính thức của Apple, không phải
+> jailbreak — nhưng vài app ngân hàng dùng SDK bảo mật gắt có thể không chịu
+> chạy khi nó đang bật. Nếu gặp thì tắt Developer Mode (khởi động lại) lúc
+> dùng app đó.
 
 ## Giấy phép
 

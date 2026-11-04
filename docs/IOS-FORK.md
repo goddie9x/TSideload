@@ -140,9 +140,15 @@ rebranded **TSideload**. Full provenance in `apps/ios/ATTRIBUTION.md`.
 
 ## Release builds
 
-Built IPAs are stored on the user's Google Drive
-(`hoangminhtam7991@gmail.com`) in the **"My iOS Creation"** folder —
-unsigned/fakesigned, install once via the desktop tool
+**Primary distribution: GitHub Releases** (`ios-v*` tags) — public, versioned,
+no login needed to download:
+[TSideload-unsigned.ipa](https://github.com/goddie9x/TSideload/releases/download/ios-v0.7.0/TSideload-unsigned.ipa)
+([release page](https://github.com/goddie9x/TSideload/releases/tag/ios-v0.7.0)).
+
+Mirror on the user's Google Drive (`hoangminhtam7991@gmail.com`, folder
+**"My iOS Creation"**).
+
+Built IPAs are unsigned/fakesigned — install once via the desktop tool
 (`tsd install <file>.ipa --apple-id <burner>`), which signs with the real
 Apple ID. After that first install the app is self-sufficient on-device.
 
@@ -153,3 +159,7 @@ Apple ID. After that first install the app is self-sufficient on-device.
   [41592959982](https://github.com/goddie9x/TSideload/actions/runs/41592959982)
   (commit `f0cda55`). Verified: `SideBackup.ipa` present inside the bundle,
   `CFBundleIdentifier` correct.
+- **2026-11-04** — `ios-v0.7.0` GitHub Release: same build published as
+  `TSideload-unsigned.ipa` via the new tag-triggered publish step
+  (CI run
+  [41824133982](https://github.com/goddie9x/TSideload/actions/runs/41824133982)).
