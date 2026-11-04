@@ -14,6 +14,12 @@ name: build-ios-ipa
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "ios-v*"
+
+permissions:
+  contents: write # create Release + upload assets on tag builds
 
 jobs:
   build:
@@ -58,3 +64,20 @@ jobs:
           name: TSideload-unsigned
           path: apps/ios/TSideload-unsigned.ipa
           retention-days: 30
+
+      - name: Publish to GitHub Release
+        # Only on tag builds (ios-v*): manual dispatches stay artifact-only.
+        if: startsWith(github.ref, 'refs/tags/ios-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/ios/TSideload-unsigned.ipa
+          body: |
+            Unsigned TSideload iOS app (fakesigned). Install it **once** with the
+            desktop tool, which signs it with your Apple ID:
+
+                tsd install TSideload-unsigned.ipa --apple-id you@example.com
+
+            Get `tsd` from the latest `desktop-v*` release
+            (or `tools/win-installer/install-tsideload.bat` on Windows).
+            After the first install, the app installs IPAs and refreshes
+            itself fully on-device — no PC needed.
