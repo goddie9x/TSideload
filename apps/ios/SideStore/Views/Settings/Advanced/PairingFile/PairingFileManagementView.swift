@@ -70,7 +70,7 @@ struct PairingFileManagementView: View {
             case .resetConfirmation:
                 return Alert(
                     title: Text("Reset Pairing Files?"),
-                    message: Text(LocalizedStringKey("This will delete all stored pairing files (both **Lockdown** and **Remote Pairing**). You will need to re-pair or re-import a pairing file and restart SideStore.")),
+                    message: Text(LocalizedStringKey("This will delete all stored pairing files (both **Lockdown** and **Remote Pairing**). You will need to re-pair or re-import a pairing file and restart TSideload.")),
                     primaryButton: .destructive(Text("Delete and Reset")) {
                         viewModel.resetAllPairingFiles()
                     },
@@ -79,7 +79,7 @@ struct PairingFileManagementView: View {
             case .resetCompleted:
                 return Alert(
                     title: Text("Pairing Files Reset"),
-                    message: Text("All pairing files have been reset. Please restart SideStore."),
+                    message: Text("All pairing files have been reset. Please restart TSideload."),
                     dismissButton: .default(Text("OK"))
                 )
             case .importError(let msg):
@@ -525,7 +525,7 @@ struct PairingFileManagementView: View {
             .background(Color.settingsRowBackground)
             .cornerRadius(14)
 
-            Text("Resetting pairing files removes stored Lockdown and Remote Pairing credentials. You will need to re-pair or re-import a pairing file and restart SideStore.")
+            Text("Resetting pairing files removes stored Lockdown and Remote Pairing credentials. You will need to re-pair or re-import a pairing file and restart TSideload.")
                 .font(.system(size: 12))
                 .foregroundColor(Color.white.opacity(0.5))
                 .padding(.horizontal, 4)

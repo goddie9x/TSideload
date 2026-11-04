@@ -1,5 +1,5 @@
 /* TSideload - Vietnamese localization (vi).
-   Generated from SideStore NSLocalizedString keys; main screens translated,
+   Generated from TSideload NSLocalizedString keys; main screens translated,
    remaining keys TODO. See apps/ios/ATTRIBUTION.md */
 "%@ %@ update. Released on %@." = "Bản cập nhật %@ %@. Phát hành ngày %@.";
 "%@ App IDs Remaining" = "Còn %@ App ID";
@@ -17,7 +17,7 @@
 "Activate %@" = "Kích hoạt %@";
 "Active" = "Đang hoạt động";
 "Add More Sources!" = "Thêm nguồn khác!";
-"Are you sure you want to clear SideStore's cache?\\n\\nCache Size: %@" = "Bạn có chắc muốn xóa bộ nhớ đệm của TSideload?\n\nDung lượng: %@";
+"Are you sure you want to clear TSideload's cache?\n\nCache Size: %@" = "Bạn có chắc muốn xóa bộ nhớ đệm của TSideload?\n\nDung lượng: %@";
 "Are you sure you want to clear the error log?" = "Bạn có chắc muốn xóa nhật ký lỗi?";
 "Are you sure you want to delete the backup for this app? This action cannot be undone." = "Bạn có chắc muốn xóa bản sao lưu của app này? Không thể hoàn tác.";
 "Are you sure you want to restore this backup?" = "Bạn có chắc muốn khôi phục bản sao lưu này?";
@@ -56,7 +56,7 @@
 "Download %@" = "Tải %@";
 "Downloading %@…" = "Đang tải %@…";
 "EXPIRED" = "HẾT HẠN";
-"Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \\n\\nEnable Disable Idle Timeout to allow SideStore to keep your device awake during a refresh or install of any apps." = "Bật Làm mới trong nền để tự động làm mới app khi có Wi-Fi. \n\nBật Tắt thời gian chờ để TSideload giữ máy không tắt màn hình khi đang làm mới hoặc cài app.";
+"Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow TSideload to keep your device awake during a refresh or install of any apps." = "Bật Làm mới trong nền để tự động làm mới app khi có Wi-Fi. \n\nBật Tắt thời gian chờ để TSideload giữ máy không tắt màn hình khi đang làm mới hoặc cài app.";
 "Enable JIT" = "Bật JIT";
 "Enter a source's URL below, or add one of the recommended sources." = "Nhập URL của nguồn bên dưới, hoặc thêm một nguồn được gợi ý.";
 "Entitlements are additional permissions that grant access to certain system services, including potentially sensitive information." = "Entitlement là các quyền bổ sung cho phép truy cập một số dịch vụ hệ thống, bao gồm cả thông tin nhạy cảm.";
@@ -68,7 +68,7 @@
 "Export (ZIP)" = "Xuất (ZIP)";
 "Export Backup" = "Xuất bản sao lưu";
 "Failed to Clear Error Log" = "Xóa nhật ký lỗi thất bại";
-"Failed to Resign SideStore" = "Ký lại TSideload thất bại";
+"Failed to Resign TSideload" = "Ký lại TSideload thất bại";
 "Failed to Sign In" = "Đăng nhập thất bại";
 "Failed to refresh %@ apps." = "Làm mới %@ app thất bại.";
 "Failed to refresh 1 app." = "Làm mới 1 app thất bại.";
@@ -76,7 +76,7 @@
 "Featured" = "Nổi bật";
 "Featured Apps" = "App nổi bật";
 "Free" = "Miễn phí";
-"Free developer accounts are limited to 1 active signing certificate. Since the private key for the active certificate was not found on this device, SideStore will create a new certificate. This will automatically revoke the active certificate, which may disable installations on other devices or made by Xcode." = "Tài khoản developer miễn phí chỉ được dùng 1 chứng chỉ ký đang hoạt động. Vì không tìm thấy private key của chứng chỉ đang hoạt động trên máy này, TSideload sẽ tạo chứng chỉ mới. Việc này sẽ tự thu hồi chứng chỉ cũ, có thể làm app đã cài trên máy khác hoặc bằng Xcode không mở được.";
+"Free developer accounts are limited to 1 active signing certificate. Since the private key for the active certificate was not found on this device, TSideload will create a new certificate. This will automatically revoke the active certificate, which may disable installations on other devices or made by Xcode." = "Tài khoản developer miễn phí chỉ được dùng 1 chứng chỉ ký đang hoạt động. Vì không tìm thấy private key của chứng chỉ đang hoạt động trên máy này, TSideload sẽ tạo chứng chỉ mới. Việc này sẽ tự thu hồi chứng chỉ cũ, có thể làm app đã cài trên máy khác hoặc bằng Xcode không mở được.";
 "Free up disk space by removing non-essential data, such as temporary files and backups for uninstalled apps." = "Giải phóng dung lượng bằng cách xóa dữ liệu không cần thiết như file tạm và bản sao lưu của app đã gỡ.";
 "From Cache" = "Từ bộ nhớ đệm";
 "From Source" = "Từ nguồn";
@@ -113,7 +113,7 @@
 "Open %@" = "Mở %@";
 "Operation Failed" = "Thao tác thất bại";
 "Other Entitlements" = "Entitlement khác";
-"Personalize your SideStore experience by choosing an alternate app icon." = "Cá nhân hóa TSideload bằng cách chọn biểu tượng app khác.";
+"Personalize your TSideload experience by choosing an alternate app icon." = "Cá nhân hóa TSideload bằng cách chọn biểu tượng app khác.";
 "Photos" = "Ảnh";
 "Please make sure your spelling is correct, or try searching for another app." = "Hãy kiểm tra lại chính tả, hoặc thử tìm app khác.";
 "Pledge" = "Ủng hộ";
@@ -131,7 +131,7 @@
 "Reinstall" = "Cài lại";
 "Remove" = "Gỡ";
 "Remove Icon" = "Gỡ biểu tượng";
-"Remove “%@” from SideStore?" = "Gỡ “%@” khỏi TSideload?";
+"Remove “%@” from TSideload?" = "Gỡ “%@” khỏi TSideload?";
 "Reset Provisioning Profile" = "Đặt lại provisioning profile";
 "Resign" = "Ký lại";
 "Resign Later" = "Ký lại sau";
@@ -143,35 +143,35 @@
 "SUPPORT US" = "ỦNG HỘ CHÚNG TÔI";
 "Search FAQ" = "Tìm trong FAQ";
 "See All" = "Xem tất cả";
-"SideStore does not have detailed information for these entitlements." = "TSideload chưa có thông tin chi tiết về các entitlement này.";
-"SideStore was installed by a different signing tool (like Xcode or AltStore)." = "TSideload được cài bằng công cụ ký khác (như Xcode hoặc AltStore).";
+"TSideload does not have detailed information for these entitlements." = "TSideload chưa có thông tin chi tiết về các entitlement này.";
+"TSideload was installed by a different signing tool (like Xcode or AltStore)." = "TSideload được cài bằng công cụ ký khác (như Xcode hoặc AltStore).";
 "Sideloaded" = "Đã sideload";
 "Sign Out" = "Đăng xuất";
-"Sign in with your Apple ID to download apps from SideStore." = "Đăng nhập Apple ID để tải app từ TSideload.";
+"Sign in with your Apple ID to download apps from TSideload." = "Đăng nhập Apple ID để tải app từ TSideload.";
 "Signing certificate mismatch detected." = "Phát hiện chứng chỉ ký không khớp.";
 "Sort by…" = "Sắp xếp…";
-"Sources determine what apps are available in SideStore. The more sources you add, the better your SideStore experience will be.\\n\\nDon’t know where to start? Try adding one of our Recommended Sources!" = "Nguồn quyết định những app nào có trong TSideload. Càng thêm nhiều nguồn, trải nghiệm càng tốt.\n\nChưa biết bắt đầu từ đâu? Hãy thử thêm một Nguồn gợi ý!";
+"Sources determine what apps are available in TSideload. The more sources you add, the better your TSideload experience will be.\n\nDon’t know where to start? Try adding one of our Recommended Sources!" = "Nguồn quyết định những app nào có trong TSideload. Càng thêm nhiều nguồn, trải nghiệm càng tốt.\n\nChưa biết bắt đầu từ đâu? Hãy thử thêm một Nguồn gợi ý!";
 "Start Backup?" = "Bắt đầu sao lưu?";
 "Success" = "Thành công";
-"Support the SideStore Team by following our socials or becoming a patron!" = "Ủng hộ nhóm phát triển bằng cách theo dõi mạng xã hội hoặc trở thành patron!";
+"Support the TSideload Team by following our socials or becoming a patron!" = "Ủng hộ nhóm phát triển bằng cách theo dõi mạng xã hội hoặc trở thành patron!";
 "TECHY THINGS" = "MỤC KỸ THUẬT";
 "Tap to view progress." = "Chạm để xem tiến trình.";
 "The active developer team has changed." = "Nhóm developer đang dùng đã thay đổi.";
 "The logged-in Apple ID account has changed." = "Tài khoản Apple ID đang đăng nhập đã thay đổi.";
-"The more you use SideStore, the more often iOS will allow it to refresh apps in the background." = "Bạn càng dùng TSideload nhiều, iOS càng cho phép nó làm mới app trong nền thường xuyên hơn.";
+"The more you use TSideload, the more often iOS will allow it to refresh apps in the background." = "Bạn càng dùng TSideload nhiều, iOS càng cho phép nó làm mới app trong nền thường xuyên hơn.";
 "The private key for the active signing certificate is missing from this device's keychain." = "Không tìm thấy private key của chứng chỉ ký đang hoạt động trong keychain của máy.";
-"The provisioning profile for SideStore is missing or invalid." = "Provisioning profile của TSideload bị thiếu hoặc không hợp lệ.";
-"The signing certificate could not be extracted from SideStore's binary." = "Không trích xuất được chứng chỉ ký từ file nhị phân của TSideload.";
-"The signing certificate used to install SideStore has expired." = "Chứng chỉ ký dùng để cài TSideload đã hết hạn.";
-"The signing certificate used to install SideStore was revoked on the Apple Developer portal." = "Chứng chỉ ký dùng để cài TSideload đã bị thu hồi trên Apple Developer.";
+"The provisioning profile for TSideload is missing or invalid." = "Provisioning profile của TSideload bị thiếu hoặc không hợp lệ.";
+"The signing certificate could not be extracted from TSideload's binary." = "Không trích xuất được chứng chỉ ký từ file nhị phân của TSideload.";
+"The signing certificate used to install TSideload has expired." = "Chứng chỉ ký dùng để cài TSideload đã hết hạn.";
+"The signing certificate used to install TSideload was revoked on the Apple Developer portal." = "Chứng chỉ ký dùng để cài TSideload đã bị thu hồi trên Apple Developer.";
 "These updates don't support iOS %@. Please update your device to the latest iOS version to install them." = "Các bản cập nhật này không hỗ trợ iOS %@. Hãy cập nhật máy lên iOS mới nhất để cài.";
-"This reinstallation registers the new signature with the OS and will terminate SideStore. You can reopen SideStore immediately once reinstallation is completed." = "Việc cài lại này đăng ký chữ ký mới với hệ thống và sẽ tắt TSideload. Bạn có thể mở lại TSideload ngay khi cài lại xong.";
+"This reinstallation registers the new signature with the OS and will terminate TSideload. You can reopen TSideload immediately once reinstallation is completed." = "Việc cài lại này đăng ký chữ ký mới với hệ thống và sẽ tắt TSideload. Bạn có thể mở lại TSideload ngay khi cài lại xong.";
 "This will also erase any backup data for this app." = "Việc này cũng sẽ xóa mọi dữ liệu sao lưu của app này.";
 "This will remove all temporary files as well as backups for uninstalled apps." = "Việc này sẽ xóa mọi file tạm cùng bản sao lưu của các app đã gỡ.";
-"This will remove “%@” from SideStore and erase any backup data for this app." = "Việc này sẽ gỡ “%@” khỏi TSideload và xóa mọi dữ liệu sao lưu của app này.";
+"This will remove “%@” from TSideload and erase any backup data for this app." = "Việc này sẽ gỡ “%@” khỏi TSideload và xóa mọi dữ liệu sao lưu của app này.";
 "This will replace all data you currently have in %@." = "Việc này sẽ thay thế toàn bộ dữ liệu hiện tại của bạn trong %@.";
-"This will replace any previous backups. Please leave SideStore open until the backup is complete." = "Việc này sẽ thay thế mọi bản sao lưu trước đó. Hãy để TSideload mở cho đến khi sao lưu xong.";
-"To ensure you can continue using SideStore, \\nthe app must be reinstalled now using the new certificate. Otherwise, you will be unable to refresh or open SideStore once the old certificate expires." = "Để tiếp tục dùng TSideload, \napp phải được cài lại ngay bằng chứng chỉ mới. Nếu không, bạn sẽ không thể làm mới hay mở TSideload khi chứng chỉ cũ hết hạn.";
+"This will replace any previous backups. Please leave TSideload open until the backup is complete." = "Việc này sẽ thay thế mọi bản sao lưu trước đó. Hãy để TSideload mở cho đến khi sao lưu xong.";
+"To ensure you can continue using TSideload, \nthe app must be reinstalled now using the new certificate. Otherwise, you will be unable to refresh or open TSideload once the old certificate expires." = "Để tiếp tục dùng TSideload, \napp phải được cài lại ngay bằng chứng chỉ mới. Nếu không, bạn sẽ không thể làm mới hay mở TSideload khi chứng chỉ cũ hết hạn.";
 "Today" = "Hôm nay";
 "Try Again" = "Thử lại";
 "Unable to Add Source" = "Không thêm được nguồn";
@@ -200,4 +200,5 @@
 "app extensions" = "các tiện ích mở rộng";
 "iOS %@ or earlier" = "iOS %@ trở xuống";
 "iOS %@ or later" = "iOS %@ trở lên";
-"“%@” could not be added to SideStore." = "Không thêm được “%@” vào TSideload.";
+"“%@” could not be added to TSideload." = "Không thêm được “%@” vào TSideload.";
+"TSideload by hmt9x.dev\nBased on the open-source SideStore project by the SideStore Team (AGPL-3.0)." = "TSideload bởi hmt9x.dev\nDựa trên dự án mã nguồn mở SideStore của SideStore Team (AGPL-3.0).";

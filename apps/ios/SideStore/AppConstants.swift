@@ -96,7 +96,7 @@ public enum AppConstants {
 
         public enum Servers {
             public static let defaultSource        = "https://servers.sidestore.io/servers.json"
-            public static let defaultServerURL     = "https://ani.sidestore.io"
+            public static let defaultServerURL     = "https://new.ani.sidestore.io"
             public static let connectivityCheckURL = URL(string: "https://www.apple.com/library/test/success.html")!
         }
 
@@ -139,9 +139,10 @@ public enum AppConstants {
         public static let pairingDocumentation      = URL(string: "https://docs.sidestore.io/docs/advanced/pairing-file")!
         public static let errorCodesDocumentation   = URL(string: "https://docs.sidestore.io/docs/troubleshooting/error-codes")!
         public static let sideStoreWebsite          = URL(string: "https://sidestore.io")!
-        public static let sideStoreGitHub           = URL(string: "https://github.com/SideStore")!
-        public static let sideStoreIssues           = URL(string: "https://github.com/SideStore/SideStore/issues")!
+        public static let sideStoreGitHub           = URL(string: "https://github.com/goddie9x/TSideload")!
+        public static let sideStoreIssues           = URL(string: "https://github.com/goddie9x/TSideload/issues")!
         public static let sideStoreDiscord          = URL(string: "https://discord.gg/sidestore-949183273383395328")!
+        public static let hmt9xWebsite                = URL(string: "https://hmt9x.dev")!
     }
 
     public enum Minimuxer {

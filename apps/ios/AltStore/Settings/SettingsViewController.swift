@@ -63,6 +63,7 @@ extension SettingsViewController
         case operations
         case designer
         case softwareLicenses
+        case website
     }
     
     private enum TechyThingsRow: Int, CaseIterable
@@ -507,7 +508,7 @@ private extension SettingsViewController
             }
             else
             {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Sign in with your Apple ID to download apps from SideStore.", comment: "")
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Sign in with your Apple ID to download apps from TSideload.", comment: "")
             }
             
         case .patreon:
@@ -517,7 +518,7 @@ private extension SettingsViewController
             }
             else
             {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Support the SideStore Team by following our socials or becoming a patron!", comment: "")
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Support the TSideload Team by following our socials or becoming a patron!", comment: "")
             }
 
         case .account:
@@ -534,7 +535,7 @@ private extension SettingsViewController
             }
             else
             {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow SideStore to keep your device awake during a refresh or install of any apps.", comment: "")
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow TSideload to keep your device awake during a refresh or install of any apps.", comment: "")
             }
             
         case .display:
@@ -544,7 +545,7 @@ private extension SettingsViewController
             }
             else
             {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Personalize your SideStore experience by choosing an alternate app icon.", comment: "")
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Personalize your TSideload experience by choosing an alternate app icon.", comment: "")
             }
             
             
@@ -562,7 +563,14 @@ private extension SettingsViewController
             }
             
         case .credits:
-            settingsHeaderFooterView.primaryLabel.text = NSLocalizedString("CREDITS", comment: "")
+            if isHeader
+            {
+                settingsHeaderFooterView.primaryLabel.text = NSLocalizedString("CREDITS", comment: "")
+            }
+            else
+            {
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("TSideload by hmt9x.dev\nBased on the open-source SideStore project by the SideStore Team (AGPL-3.0).", comment: "")
+            }
             
         case .advancedSettings:
             settingsHeaderFooterView.primaryLabel.text = NSLocalizedString("ADVANCED SETTINGS", comment: "")
@@ -793,7 +801,7 @@ private extension SettingsViewController
     func clearCache()
     {
         let makeCacheTitle: (String) -> String = { sizeString in
-            String(format: NSLocalizedString("Are you sure you want to clear SideStore's cache?\n\nCache Size: %@", comment: ""), sizeString)
+            String(format: NSLocalizedString("Are you sure you want to clear TSideload's cache?\n\nCache Size: %@", comment: ""), sizeString)
         }
         let alertController = UIAlertController(title: makeCacheTitle(NSLocalizedString("Calculating…", comment: "")),
                                                 message: NSLocalizedString("This will remove all temporary files as well as backups for uninstalled apps.", comment: ""),
@@ -1085,12 +1093,12 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return nil
         case .signIn where self.activeTeam != nil: return nil
         // case .signIn, .patreon, .display, .appRefresh, .techyThings, .macDirtyCow:
-        case .signIn, .patreon, .display, .appRefresh, .techyThings, .betaTesting:
+        case .signIn, .patreon, .display, .appRefresh, .techyThings, .betaTesting, .credits:
             let footerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "HeaderFooterView") as! SettingsHeaderFooterView
             self.prepare(footerView, for: section, isHeader: false)
             return footerView
             
-        case .account, .credits, .advancedSettings, .instructions, .diagnostics: return nil
+        case .account, .advancedSettings, .instructions, .diagnostics: return nil
         }
     }
 
@@ -1119,11 +1127,11 @@ extension SettingsViewController
         case .signIn where self.activeTeam != nil: return 1.0
         case .account where self.activeTeam == nil: return 1.0            
         // case .signIn, .patreon, .display, .appRefresh, .techyThings, .macDirtyCow:
-        case .signIn, .patreon, .display, .appRefresh, .techyThings, .betaTesting:
+        case .signIn, .patreon, .display, .appRefresh, .techyThings, .betaTesting, .credits:
             let height = self.preferredHeight(for: self.prototypeHeaderFooterView, in: section, isHeader: false)
             return height
             
-        case .account, .credits, .advancedSettings, .instructions, .diagnostics: return 0.0
+        case .account, .advancedSettings, .instructions, .diagnostics: return 0.0
         }
     }
 }
@@ -1209,6 +1217,7 @@ extension SettingsViewController
             case .operations: self.openTwitter(username: "sidestoreio")
             case .designer: self.openTwitter(username: "lit_ritt")
             case .softwareLicenses: break
+            case .website: self.openWebURL(AppConstants.URLs.hmt9xWebsite, preferredTintColor: .altPrimary)
             }
             
             if let selectedIndexPath = self.tableView.indexPathForSelectedRow
@@ -1243,9 +1252,9 @@ extension SettingsViewController
 
                         // TODO: MARKETING_VERSION is going to be set anyways so this needs to be fixed for beta
                         if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
-                            mailViewController.setSubject("SideStore Beta \(version) Feedback")
+                            mailViewController.setSubject("TSideload Beta \(version) Feedback")
                         } else {
-                            mailViewController.setSubject("SideStore Beta Feedback")
+                            mailViewController.setSubject("TSideload Beta Feedback")
                         }
 
                        self.present(mailViewController, animated: true, completion: nil)
@@ -1297,7 +1306,7 @@ extension SettingsViewController
                     selected: UserDefaults.standard.menuAnisetteURL,
                     onResetAdiPb: { [weak self] in
                         guard let self = self else { return }
-                        ToastView(text: "Cleared adi.pb!", detailText: "You will need to log back into Apple ID in SideStore.")
+                        ToastView(text: "Cleared adi.pb!", detailText: "You will need to log back into Apple ID in TSideload.")
                             .show(in: self)
                     }
                 )
