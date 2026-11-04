@@ -35,8 +35,8 @@ env:
   PROCESSOR_ARCHITECTURE: "x64"
   # Identity Partner Center (View app identity details).
   # Để trống = placeholder CN=Dev — chỉ test local, nộp Store thì điền thật.
-  MSIX_IDENTITY_NAME: ""
-  MSIX_PUBLISHER: ""
+  MSIX_IDENTITY_NAME: "goddie9x.TSideload"
+  MSIX_PUBLISHER: "CN=8633D8C8-01ED-4486-B41B-1CD6E3B8F80D"
   MSIX_PUBLISHER_DISPLAY_NAME: ""
   MSIX_ASSETS_DIR: ""
 
