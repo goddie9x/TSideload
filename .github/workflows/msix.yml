@@ -37,7 +37,7 @@ env:
   # Để trống = placeholder CN=Dev — chỉ test local, nộp Store thì điền thật.
   MSIX_IDENTITY_NAME: "goddie9x.TSideload"
   MSIX_PUBLISHER: "CN=8633D8C8-01ED-4486-B41B-1CD6E3B8F80D"
-  MSIX_PUBLISHER_DISPLAY_NAME: ""
+  MSIX_PUBLISHER_DISPLAY_NAME: "goddie9x" # phải khớp publisher display name trên Partner Center
   MSIX_ASSETS_DIR: ""
 
 jobs:
