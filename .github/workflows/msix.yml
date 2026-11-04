@@ -38,7 +38,7 @@ env:
   MSIX_IDENTITY_NAME: "goddie9x.TSideload"
   MSIX_PUBLISHER: "CN=8633D8C8-01ED-4486-B41B-1CD6E3B8F80D"
   MSIX_PUBLISHER_DISPLAY_NAME: "goddie9x" # phải khớp publisher display name trên Partner Center
-  MSIX_ASSETS_DIR: ""
+  MSIX_ASSETS_DIR: "packaging/msix-assets"
 
 jobs:
   msix:
