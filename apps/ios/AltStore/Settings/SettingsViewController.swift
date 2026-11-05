@@ -130,6 +130,7 @@ final class SettingsViewController: UITableViewController
     private weak var debugGestureTimer: Timer?
     
     @IBOutlet private var accountNameLabel: UILabel!
+    @IBOutlet private var accountEmailLabel: UILabel!
     @IBOutlet private var accountTypeLabel: UILabel!
     
     @IBOutlet private var backgroundRefreshSwitch: UISwitch!
@@ -403,6 +404,7 @@ private extension SettingsViewController
             if let team = currentActiveTeam, AuthManager.shared.isAuthenticated
             {
                 self.accountNameLabel.text = team.name
+                self.accountEmailLabel.text = appleID
                 self.accountTypeLabel.text = team.type.localizedDescription
                 
                 self.activeTeam = team
@@ -1077,10 +1079,6 @@ extension SettingsViewController
         {
         case .signIn: self.signIn()
         case .account:
-            if indexPath.row == 1 {
-                // GitHub row (was the account email row): open the TSideload repo.
-                self.openWebURL(AppConstants.URLs.sideStoreGitHub, preferredTintColor: .altPrimary)
-            }
             if indexPath.row == 3 {
                 tableView.deselectRow(at: indexPath, animated: true)
                 self.resolvePendingAccountActions()

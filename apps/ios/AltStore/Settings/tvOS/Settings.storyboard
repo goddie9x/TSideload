@@ -129,14 +129,14 @@
                                             <rect key="frame" x="0.0" y="0.0" width="402" height="51"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" alpha="0.80000001192092896" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="GitHub" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="rAc-lQ-B1k">
+                                                <label opaque="NO" multipleTouchEnabled="YES" alpha="0.80000001192092896" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Email" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="rAc-lQ-B1k">
                                                     <rect key="frame" x="29.999999999999996" y="15.999999999999998" width="40.666666666666664" height="20.333333333333332"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" white="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="github.com/goddie9x/TSideload" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" id="0uP-Cd-tNX">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" id="0uP-Cd-tNX">
                                                     <rect key="frame" x="190" y="15.999999999999998" width="182" height="20.333333333333332"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
@@ -1335,6 +1335,7 @@
                     <navigationItem key="navigationItem" title="Settings" id="Ddg-UQ-KJ8"/>
                     <connections>
                         <outlet property="accountNameLabel" destination="CnN-M1-AYK" id="Ldc-Py-Bix"/>
+                        <outlet property="accountEmailLabel" destination="0uP-Cd-tNX" id="14b-aL-yE3"/>
                         <outlet property="accountTypeLabel" destination="434-MW-Den" id="mNB-QE-4Jg"/>
                         <outlet property="altSignVerboseLoggingSwitch" destination="ns7-8G-sT9" id="a2K-b8-xWs"/>
                         <outlet property="backgroundRefreshSwitch" destination="DPu-zD-Als" id="eiG-Hv-Vko"/>
