@@ -144,17 +144,11 @@
 				News/tvOS/NewsCollectionViewCell.xib = (
 					tvos,
 				);
-				Settings/AboutPatreonHeaderView.xib = (
-					ios,
-				);
 				Settings/Settings.storyboard = (
 					ios,
 				);
 				Settings/SettingsHeaderFooterView.xib = (
 					ios,
-				);
-				Settings/tvOS/AboutPatreonHeaderView.xib = (
-					tvos,
 				);
 				Settings/tvOS/Settings.storyboard = (
 					tvos,

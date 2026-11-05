@@ -141,7 +141,6 @@ public enum AppConstants {
         public static let sideStoreWebsite          = URL(string: "https://sidestore.io")!
         public static let sideStoreGitHub           = URL(string: "https://github.com/goddie9x/TSideload")!
         public static let sideStoreIssues           = URL(string: "https://github.com/goddie9x/TSideload/issues")!
-        public static let sideStoreDiscord          = URL(string: "https://discord.gg/sidestore-949183273383395328")!
         public static let hmt9xWebsite                = URL(string: "https://hmt9x.dev")!
     }
 

@@ -33,48 +33,6 @@
                                 <stackView opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="hru-pm-ZI3">
                                     <rect key="frame" x="102" y="46" width="198" height="34.666666666666657"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="B8Q-e7-beR" userLabel="Mastodon">
-                                            <rect key="frame" x="0.0" y="0.0" width="34.666666666666664" height="34.666666666666664"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" secondItem="B8Q-e7-beR" secondAttribute="height" id="gaj-Mb-oSa"/>
-                                                <constraint firstAttribute="width" constant="34.5" id="kjw-36-Rjk"/>
-                                            </constraints>
-                                            <state key="normal" title=""/>
-                                            <buttonConfiguration key="configuration" style="plain" title="  ">
-                                                <backgroundConfiguration key="background" image="Mastodon" imageContentMode="scaleAspectFit"/>
-                                            </buttonConfiguration>
-                                            <connections>
-                                                <action selector="followAltStoreMastodon" destination="aMk-Xp-UL8" eventType="primaryActionTriggered" id="nKQ-bR-E96"/>
-                                            </connections>
-                                        </button>
-                                        <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AWk-yE-9LI" userLabel="Threads">
-                                            <rect key="frame" x="54.666666666666657" y="0.0" width="34.333333333333343" height="34.666666666666664"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="34.5" id="3o9-57-KDr"/>
-                                                <constraint firstAttribute="width" secondItem="AWk-yE-9LI" secondAttribute="height" id="QuX-po-kv7"/>
-                                            </constraints>
-                                            <state key="normal" title=""/>
-                                            <buttonConfiguration key="configuration" style="plain">
-                                                <backgroundConfiguration key="background" image="Threads" imageContentMode="scaleAspectFit"/>
-                                            </buttonConfiguration>
-                                            <connections>
-                                                <action selector="followAltStoreThreads" destination="aMk-Xp-UL8" eventType="primaryActionTriggered" id="0f0-KK-7lE"/>
-                                            </connections>
-                                        </button>
-                                        <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uYZ-Vu-RzK" userLabel="Twitter">
-                                            <rect key="frame" x="109" y="0.0" width="34.666666666666657" height="34.666666666666664"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="34.5" id="LKG-L3-APj"/>
-                                                <constraint firstAttribute="width" secondItem="uYZ-Vu-RzK" secondAttribute="height" id="UyA-cy-ol3"/>
-                                            </constraints>
-                                            <state key="normal" title=""/>
-                                            <buttonConfiguration key="configuration" style="plain">
-                                                <backgroundConfiguration key="background" image="Twitter" imageContentMode="scaleAspectFit"/>
-                                            </buttonConfiguration>
-                                            <connections>
-                                                <action selector="followAltStoreTwitter" destination="aMk-Xp-UL8" eventType="primaryActionTriggered" id="m1Q-xB-VTe"/>
-                                            </connections>
-                                        </button>
                                         <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oqj-4S-I9l" userLabel="GitHub">
                                             <rect key="frame" x="163.66666666666669" y="0.0" width="34.333333333333343" height="34.666666666666664"/>
                                             <constraints>
@@ -146,7 +104,7 @@
                                                     <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Side Team" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" id="CnN-M1-AYK">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="TSideload" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" id="CnN-M1-AYK">
                                                     <rect key="frame" x="289.66666666666669" y="15.999999999999998" width="82.333333333333329" height="20.333333333333332"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
@@ -171,14 +129,14 @@
                                             <rect key="frame" x="0.0" y="0.0" width="402" height="51"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" alpha="0.80000001192092896" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Email" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="rAc-lQ-B1k">
+                                                <label opaque="NO" multipleTouchEnabled="YES" alpha="0.80000001192092896" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="GitHub" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="rAc-lQ-B1k">
                                                     <rect key="frame" x="29.999999999999996" y="15.999999999999998" width="40.666666666666664" height="20.333333333333332"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" white="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="sideteam@sidestore.io" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" id="0uP-Cd-tNX">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="github.com/goddie9x/TSideload" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" id="0uP-Cd-tNX">
                                                     <rect key="frame" x="190" y="15.999999999999998" width="182" height="20.333333333333332"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
@@ -227,47 +185,6 @@
                                                 <integer key="value" value="3"/>
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
-                                    </tableViewCell>
-                                </cells>
-                            </tableViewSection>
-                            <tableViewSection id="YHi-gR-wed">
-                                <cells>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="51" id="R1C-Gr-xD4" customClass="InsetGroupTableViewCell" customModule="SideStore" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="293.33333206176758" width="402" height="51"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="R1C-Gr-xD4" id="Ojx-7f-z7E">
-                                            <rect key="frame" x="0.0" y="0.0" width="402" height="51"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Support the team" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3Il-5a-5Zp">
-                                                    <rect key="frame" x="30" y="15.333333333333334" width="142.33333333333334" height="20.333333333333329"/>
-                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ksV-TB-cmH">
-                                                    <rect key="frame" x="356.33333333333331" y="14.333333333333334" width="15.666666666666686" height="22.333333333333329"/>
-                                                    <imageReference key="image" image="chevron.right" catalog="system" symbolScale="large"/>
-                                                </imageView>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstItem="ksV-TB-cmH" firstAttribute="centerY" secondItem="Ojx-7f-z7E" secondAttribute="centerY" id="Fn5-7K-zZy"/>
-                                                <constraint firstItem="3Il-5a-5Zp" firstAttribute="leading" secondItem="Ojx-7f-z7E" secondAttribute="leadingMargin" id="IIA-QX-tN3"/>
-                                                <constraint firstAttribute="trailingMargin" secondItem="ksV-TB-cmH" secondAttribute="trailing" id="ibe-bR-asZ"/>
-                                                <constraint firstItem="3Il-5a-5Zp" firstAttribute="centerY" secondItem="Ojx-7f-z7E" secondAttribute="centerY" id="l0D-9Q-8eh"/>
-                                            </constraints>
-                                        </tableViewCellContentView>
-                                        <color key="backgroundColor" white="1" alpha="0.14999999999999999" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <edgeInsets key="layoutMargins" top="8" left="30" bottom="8" right="30"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="style">
-                                                <integer key="value" value="0"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="boolean" keyPath="isSelectable" value="YES"/>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <segue destination="dp8-8j-vt9" kind="show" identifier="showPatreon" id="gCj-C6-hPm"/>
-                                        </connections>
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
@@ -1442,7 +1359,6 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Settings" id="Ddg-UQ-KJ8"/>
                     <connections>
-                        <outlet property="accountEmailLabel" destination="0uP-Cd-tNX" id="14b-aL-yE3"/>
                         <outlet property="accountNameLabel" destination="CnN-M1-AYK" id="Ldc-Py-Bix"/>
                         <outlet property="accountTypeLabel" destination="434-MW-Den" id="mNB-QE-4Jg"/>
                         <outlet property="altSignVerboseLoggingSwitch" destination="ns7-8G-sT9" id="a2K-b8-xWs"/>
@@ -1454,13 +1370,10 @@
                         <outlet property="disableAppLimitSwitch" destination="1aa-og-ZXD" id="oVL-Md-yZ8"/>
                         <outlet property="disableResponseCachingSwitch" destination="AAh-cu-qw8" id="aVT-Md-yZ8"/>
                         <outlet property="githubButton" destination="oqj-4S-I9l" id="sxB-LE-gA2"/>
-                        <outlet property="mastodonButton" destination="B8Q-e7-beR" id="Kbe-Og-rsg"/>
                         <outlet property="minimuxerVerboseLoggingSwitch" destination="os8-7F-rSm" id="gxg-Gx-xwO"/>
                         <outlet property="rotateLogsOnStartupSwitch" destination="rot-lg-switch" id="rot-lg-outlet-conn"/>
                         <outlet property="noIdleTimeoutSwitch" destination="iQA-wm-5ag" id="jHC-js-q0Y"/>
                         <outlet property="recreateDatabaseSwitch" destination="uGv-Lb-Ita" id="BMU-cK-0ee"/>
-                        <outlet property="threadsButton" destination="AWk-yE-9LI" id="SOc-ei-4gK"/>
-                        <outlet property="twitterButton" destination="uYZ-Vu-RzK" id="anA-jh-w4z"/>
                         <outlet property="verboseOperationsLoggingSwitch" destination="Q5X-Mo-KpE" id="aVL-Md-tZ8"/>
                         <outlet property="versionLabel" destination="5u7-mb-jJj" id="zvU-TQ-lO6"/>
                     </connections>
@@ -1537,7 +1450,7 @@
                                                         </label>
                                                     </subviews>
                                                 </stackView>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Could not connect to SideStore." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7L1-AA-2yo">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Could not connect to TSideload." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7L1-AA-2yo">
                                                     <rect key="frame" x="0.0" y="24.333333333333336" width="362" height="19"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                     <nil key="highlightedColor"/>
@@ -1707,33 +1620,6 @@ Settings by i cons from the Noun Project</string>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wxS-B5-ogA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1697" y="-1335"/>
-        </scene>
-        <!--Support us-->
-        <scene sceneID="Lnh-9P-HnL">
-            <objects>
-                <collectionViewController id="dp8-8j-vt9" customClass="PatreonViewController" customModule="SideStore" customModuleProvider="target" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" dataMode="prototypes" id="OTF-Qv-Z5w">
-                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="SettingsBackground"/>
-                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="20" id="5Ex-oN-7dE">
-                            <size key="itemSize" width="157" height="20"/>
-                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                            <inset key="sectionInset" minX="20" minY="8" maxX="20" maxY="0.0"/>
-                        </collectionViewFlowLayout>
-                        <cells/>
-                        <connections>
-                            <outlet property="dataSource" destination="dp8-8j-vt9" id="ONG-kb-M7N"/>
-                            <outlet property="delegate" destination="dp8-8j-vt9" id="790-Kr-6l7"/>
-                        </connections>
-                    </collectionView>
-                    <navigationItem key="navigationItem" title="Support us" largeTitleDisplayMode="always" id="uUV-1f-xEq"/>
-                </collectionViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="qq3-Hj-S9f" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1697" y="-636"/>
         </scene>
         <!--instructionsViewController-->
         <scene sceneID="zGq-MO-WdN">

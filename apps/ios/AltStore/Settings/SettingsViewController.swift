@@ -8,9 +8,6 @@
 
 @preconcurrency import UIKit
 import SwiftUI
-#if !os(tvOS)
-import MessageUI
-#endif
 import Intents
 #if !os(tvOS)
 import IntentsUI
@@ -26,7 +23,6 @@ extension SettingsViewController
     {
         case signIn
         case account
-        case patreon
         case display
         case appRefresh
         case instructions
@@ -134,7 +130,6 @@ final class SettingsViewController: UITableViewController
     private weak var debugGestureTimer: Timer?
     
     @IBOutlet private var accountNameLabel: UILabel!
-    @IBOutlet private var accountEmailLabel: UILabel!
     @IBOutlet private var accountTypeLabel: UILabel!
     
     @IBOutlet private var backgroundRefreshSwitch: UISwitch!
@@ -149,9 +144,6 @@ final class SettingsViewController: UITableViewController
 //    @IBOutlet private var refreshSideJITServer: UILabel!
     @IBOutlet private var disableResponseCachingSwitch: UISwitch!
     
-    @IBOutlet private var mastodonButton: UIButton!
-    @IBOutlet private var threadsButton: UIButton!
-    @IBOutlet private var twitterButton: UIButton!
     @IBOutlet private var githubButton: UIButton!
     
     @IBOutlet private var versionLabel: UILabel!
@@ -171,7 +163,6 @@ final class SettingsViewController: UITableViewController
     {
         super.init(coder: aDecoder)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(SettingsViewController.openPatreonSettings(_:)), name: AppDelegate.openPatreonSettingsDeepLinkNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(SettingsViewController.openErrorLog(_:)), name: ToastView.openErrorLogNotification, object: nil)
     }
     
@@ -274,7 +265,7 @@ final class SettingsViewController: UITableViewController
         // We can only configure the contentMode for a button's background image from Interface Builder.
         // This works, but it means buttons don't visually highlight because there's no foreground image.
         // As a workaround, we manually set the foreground image + contentMode here.
-        for button in [self.mastodonButton!, self.threadsButton!, self.twitterButton!, self.githubButton!]
+        for button in [self.githubButton!]
         {
             // Get the assigned image from Interface Builder.
             let image = button.configuration?.background.image
@@ -412,7 +403,6 @@ private extension SettingsViewController
             if let team = currentActiveTeam, AuthManager.shared.isAuthenticated
             {
                 self.accountNameLabel.text = team.name
-                self.accountEmailLabel.text = appleID
                 self.accountTypeLabel.text = team.type.localizedDescription
                 
                 self.activeTeam = team
@@ -511,16 +501,6 @@ private extension SettingsViewController
                 settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Sign in with your Apple ID to download apps from TSideload.", comment: "")
             }
             
-        case .patreon:
-            if isHeader
-            {
-                settingsHeaderFooterView.primaryLabel.text = NSLocalizedString("SUPPORT US", comment: "")
-            }
-            else
-            {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Support the TSideload Team by following our socials or becoming a patron!", comment: "")
-            }
-
         case .account:
             settingsHeaderFooterView.primaryLabel.text = NSLocalizedString("ACCOUNT", comment: "")
             
@@ -880,45 +860,6 @@ private extension SettingsViewController
         }
     }
     
-    func openMastodon(username: String)
-    {
-        // Rely on universal links to open app.
-        
-        let components = username.split(separator: "@")
-        guard components.count == 2 else { return }
-        
-        let server = String(components[1])
-        let username = "@" + String(components[0])
-        
-        guard let serverURL = URL(string: "https://" + server) else { return }
-        
-        let mastodonURL = serverURL.appendingPathComponent(username)
-        UIApplication.shared.open(mastodonURL, options: [:])
-    }
-    
-    func openThreads(username: String)
-    {
-        // Rely on universal links to open app.
-        
-        let safariURL = URL(string: "https://www.threads.net/@" + username)!
-        UIApplication.shared.open(safariURL, options: [:])
-    }
-    
-    @IBAction func followAltStoreMastodon()
-    {
-        self.openMastodon(username: "@sidestoreio@fosstodon.org")
-    }
-    
-    @IBAction func followAltStoreThreads()
-    {
-        self.openThreads(username: "sidestore.io")
-    }
-    
-    @IBAction func followAltStoreTwitter()
-    {
-        self.openTwitter(username: "sidestoreio")
-    }
-    
     @IBAction func followAltStoreGitHub()
     {
         UIApplication.shared.open(AppConstants.URLs.sideStoreGitHub, options: [:])
@@ -927,16 +868,6 @@ private extension SettingsViewController
 
 private extension SettingsViewController
 {
-    @objc func openPatreonSettings(_ notification: Notification)
-    {
-        guard self.presentedViewController == nil else { return }
-                
-        UIView.performWithoutAnimation {
-            self.navigationController?.popViewController(animated: false)
-            self.performSegue(withIdentifier: "showPatreon", sender: nil)
-        }
-    }
-
     @objc func openErrorLog(_: Notification) {
         guard self.presentedViewController == nil else { return }
 
@@ -1076,7 +1007,7 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return nil
         case .signIn where self.activeTeam != nil: return nil
         case .account where self.activeTeam == nil: return nil
-        case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .advancedSettings, .betaTesting, .diagnostics /* ,.macDirtyCow */:
+        case .signIn, .account, .display, .appRefresh, .techyThings, .credits, .advancedSettings, .betaTesting, .diagnostics /* ,.macDirtyCow */:
             let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "HeaderFooterView") as! SettingsHeaderFooterView
             self.prepare(headerView, for: section, isHeader: true)
             return headerView
@@ -1092,8 +1023,8 @@ extension SettingsViewController
         {
         case _ where isSectionHidden(section): return nil
         case .signIn where self.activeTeam != nil: return nil
-        // case .signIn, .patreon, .display, .appRefresh, .techyThings, .macDirtyCow:
-        case .signIn, .patreon, .display, .appRefresh, .techyThings, .betaTesting, .credits:
+        // case .signIn, .display, .appRefresh, .techyThings, .macDirtyCow:
+        case .signIn, .display, .appRefresh, .techyThings, .betaTesting, .credits:
             let footerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "HeaderFooterView") as! SettingsHeaderFooterView
             self.prepare(footerView, for: section, isHeader: false)
             return footerView
@@ -1110,7 +1041,7 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return 1.0
         case .signIn where self.activeTeam != nil: return 1.0
         case .account where self.activeTeam == nil: return 1.0
-        case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .advancedSettings, .betaTesting, .diagnostics:
+        case .signIn, .account, .display, .appRefresh, .techyThings, .credits, .advancedSettings, .betaTesting, .diagnostics:
             let height = self.preferredHeight(for: self.prototypeHeaderFooterView, in: section, isHeader: true)
             return height
             
@@ -1126,8 +1057,8 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return 1.0
         case .signIn where self.activeTeam != nil: return 1.0
         case .account where self.activeTeam == nil: return 1.0            
-        // case .signIn, .patreon, .display, .appRefresh, .techyThings, .macDirtyCow:
-        case .signIn, .patreon, .display, .appRefresh, .techyThings, .betaTesting, .credits:
+        // case .signIn, .display, .appRefresh, .techyThings, .macDirtyCow:
+        case .signIn, .display, .appRefresh, .techyThings, .betaTesting, .credits:
             let height = self.preferredHeight(for: self.prototypeHeaderFooterView, in: section, isHeader: false)
             return height
             
@@ -1146,6 +1077,10 @@ extension SettingsViewController
         {
         case .signIn: self.signIn()
         case .account:
+            if indexPath.row == 1 {
+                // GitHub row (was the account email row): open the TSideload repo.
+                self.openWebURL(AppConstants.URLs.sideStoreGitHub, preferredTintColor: .altPrimary)
+            }
             if indexPath.row == 3 {
                 tableView.deselectRow(at: indexPath, animated: true)
                 self.resolvePendingAccountActions()
@@ -1236,34 +1171,6 @@ extension SettingsViewController
                 alertController.addAction(UIAlertAction(title: "GitHub", style: .default) { _ in
                     self.openWebURL(AppConstants.URLs.sideStoreIssues, preferredTintColor: .altPrimary)
                 })
-                
-                // Option 2: Discord
-                alertController.addAction(UIAlertAction(title: "Discord", style: .default) { _ in
-                    self.openWebURL(AppConstants.URLs.sideStoreDiscord, preferredTintColor: .altPrimary)
-                })
-                
-                #if !os(tvOS)
-                // Option 3: Mail
-                alertController.addAction(UIAlertAction(title: "Send Email", style: .default) { _ in
-                    if MFMailComposeViewController.canSendMail() {
-                        let mailViewController = MFMailComposeViewController()
-                        mailViewController.mailComposeDelegate = self
-                        mailViewController.setToRecipients(["support@sidestore.io"])
-
-                        // TODO: MARKETING_VERSION is going to be set anyways so this needs to be fixed for beta
-                        if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
-                            mailViewController.setSubject("TSideload Beta \(version) Feedback")
-                        } else {
-                            mailViewController.setSubject("TSideload Beta Feedback")
-                        }
-
-                       self.present(mailViewController, animated: true, completion: nil)
-                    } else {
-                      let toastView = ToastView(text: NSLocalizedString("Cannot Send Mail", comment: ""), detailText: nil)
-                      toastView.show(in: self)
-                    }
-                })
-                #endif
                 
                 // Cancel action
                 alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
@@ -1384,8 +1291,8 @@ extension SettingsViewController
             }
             
             
-        // case .account, .patreon, .display, .instructions, .macDirtyCow: break
-        case .patreon, .display, .instructions, .betaTesting: break
+        // case .account, .display, .instructions, .macDirtyCow: break
+        case .display, .instructions, .betaTesting: break
         }
         
         
@@ -1393,22 +1300,6 @@ extension SettingsViewController
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
-
-#if !os(tvOS)
-extension SettingsViewController: MFMailComposeViewControllerDelegate
-{
-    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?)
-    {
-        if let error = error
-        {
-            let toastView = ToastView(error: error)
-            toastView.show(in: self)
-        }
-        
-        controller.dismiss(animated: true, completion: nil)
-    }
-}
-#endif
 
 extension SettingsViewController: UIGestureRecognizerDelegate
 {

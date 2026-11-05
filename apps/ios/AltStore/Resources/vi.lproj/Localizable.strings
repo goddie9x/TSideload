@@ -33,7 +33,6 @@
 "Cancel" = "Hủy";
 "Cannot Activate More than 3 Apps" = "Không thể kích hoạt quá 3 app";
 "Cannot Activate More than 3 Apps and App Extensions" = "Không thể kích hoạt quá 3 app và tiện ích mở rộng";
-"Cannot Send Mail" = "Không thể gửi mail";
 "Categories" = "Danh mục";
 "Change App Icon" = "Đổi biểu tượng app";
 "Change Icon" = "Đổi biểu tượng";
@@ -140,7 +139,6 @@
 "Restore Previous Backup" = "Khôi phục bản sao lưu trước";
 "Revoke and Resign Now" = "Thu hồi và ký lại ngay";
 "SIGN OUT" = "ĐĂNG XUẤT";
-"SUPPORT US" = "ỦNG HỘ CHÚNG TÔI";
 "Search FAQ" = "Tìm trong FAQ";
 "See All" = "Xem tất cả";
 "TSideload does not have detailed information for these entitlements." = "TSideload chưa có thông tin chi tiết về các entitlement này.";
@@ -153,7 +151,6 @@
 "Sources determine what apps are available in TSideload. The more sources you add, the better your TSideload experience will be.\n\nDon’t know where to start? Try adding one of our Recommended Sources!" = "Nguồn quyết định những app nào có trong TSideload. Càng thêm nhiều nguồn, trải nghiệm càng tốt.\n\nChưa biết bắt đầu từ đâu? Hãy thử thêm một Nguồn gợi ý!";
 "Start Backup?" = "Bắt đầu sao lưu?";
 "Success" = "Thành công";
-"Support the TSideload Team by following our socials or becoming a patron!" = "Ủng hộ nhóm phát triển bằng cách theo dõi mạng xã hội hoặc trở thành patron!";
 "TECHY THINGS" = "MỤC KỸ THUẬT";
 "Tap to view progress." = "Chạm để xem tiến trình.";
 "The active developer team has changed." = "Nhóm developer đang dùng đã thay đổi.";
