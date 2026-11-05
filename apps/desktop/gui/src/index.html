@@ -41,6 +41,7 @@
                padding: 20px; width: 400px; max-width: 92vw; }
   .modal-box h3 { margin: 0 0 10px; font-size: 16px; }
   .modal-box .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  section .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   #twofa_code { width: 140px; font-size: 18px; letter-spacing: 4px; text-align: center; }
 </style>
 </head>
@@ -110,6 +111,16 @@
   </div>
   <p id="progress" class="hint" hidden></p>
   <p id="install_msg" class="hint"></p>
+</section>
+
+<section id="pairing_box" hidden>
+  <h2 data-i18n="pairing.title">Pairing file</h2>
+  <p id="pairing_status" class="hint"></p>
+  <div class="row">
+    <button id="push_pairing" class="secondary" data-i18n="pairing.push_again">Re-push pairing file</button>
+    <button id="export_pairing" class="secondary" data-i18n="pairing.export">Export pairing file</button>
+  </div>
+  <p id="pairing_msg" class="hint"></p>
 </section>
 
 <div id="twofa_modal" class="modal" hidden>

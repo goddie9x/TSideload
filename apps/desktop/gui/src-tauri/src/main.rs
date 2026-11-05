@@ -9,6 +9,12 @@
 //! `tsideload://install-stage` events (`login` / `signing` / `done` /
 //! `done_cert` / `error`).
 //!
+//! After a successful install the pairing file is pushed to the phone and
+//! the outcome is reported as `pairing_pushed` / `pairing_failed` stages
+//! (the install itself already succeeded). `push_pairing` re-pushes it on
+//! demand and `export_pairing` saves it via a save dialog, so a failed
+//! automatic push never needs a terminal to recover from.
+//!
 //! Build note: this crate is excluded from the workspace and needs
 //! WebView2 (Windows) / WebKit (macOS). It has never been compiled on the
 //! Linux dev VM (no webkit2gtk) — P1b was written by careful reading only.
@@ -20,6 +26,7 @@ use std::sync::{mpsc, Arc, Mutex};
 
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State};
+use tauri_plugin_dialog::DialogExt;
 use tsideload_core::{DeviceInfo, TwoFactorAnswer, TwoFactorPrompt};
 
 // ---------------------------------------------------------------------------
@@ -153,16 +160,64 @@ fn emit_stage(app: &AppHandle, stage: &str, detail: Option<String>) {
     );
 }
 
-/// Best-effort pairing-file push after a successful install: warn (stderr)
-/// and continue — the install itself already succeeded. The iOS app
-/// self-imports the pushed file on first launch; if the push failed the
-/// user can still import the file manually.
-async fn push_pairing_best_effort(udid: Option<&str>) {
-    if let Err(e) = tsideload_core::pairing::push_pairing_for_udid(udid).await {
-        eprintln!(
-            "warning: could not push pairing file ({e}) — import it manually in the app if needed."
-        );
+/// Best-effort pairing-file push after a successful install. Reports the
+/// outcome to the UI as `pairing_pushed` / `pairing_failed` stages (the
+/// install itself already succeeded) instead of only logging to stderr,
+/// where a GUI user can never see it.
+async fn push_pairing_report(app: &AppHandle, udid: Option<&str>) {
+    match tsideload_core::pairing::push_pairing_for_udid(udid).await {
+        Ok(()) => emit_stage(app, "pairing_pushed", None),
+        Err(e) => emit_stage(app, "pairing_failed", Some(e.to_string())),
     }
+}
+
+/// Re-push the pairing file without reinstalling: manual retry for the
+/// automatic push that runs after install. Returns Ok on success, Err
+/// with the actual error text on failure — the frontend shows it.
+#[tauri::command]
+async fn push_pairing(udid: Option<String>) -> Result<(), String> {
+    tsideload_core::init();
+    tsideload_core::pairing::push_pairing_for_udid(udid.as_deref())
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Export the pairing file through a save dialog (prefilled with the
+/// pairing filename, starting in the Desktop folder) so the user can
+/// import it manually in the iOS app without touching a terminal.
+/// Returns the path the file was written to.
+#[tauri::command]
+async fn export_pairing(app: AppHandle, udid: Option<String>) -> Result<String, String> {
+    tsideload_core::init();
+    let plist = tsideload_core::pairing::export_pairing_plist(udid.as_deref())
+        .await
+        .map_err(|e| e.to_string())?;
+    let desktop = dirs::desktop_dir().unwrap_or_else(|| PathBuf::from("."));
+    // The native dialog is blocking: run it on a blocking thread, never on
+    // a Tokio worker or the main thread.
+    let app_for_dialog = app.clone();
+    let picked = tokio::task::spawn_blocking(move || {
+        app_for_dialog
+            .dialog()
+            .file()
+            .set_directory(&desktop)
+            .set_file_name(tsideload_core::pairing::PAIRING_FILENAME)
+            .add_filter("Pairing file", &["mobiledevicepairing"])
+            .blocking_save_file()
+    })
+    .await
+    .map_err(|e| format!("save dialog failed: {e}"))?;
+    let path = match picked {
+        // The user closed the dialog without choosing a file.
+        None => return Err("save cancelled".to_string()),
+        // A chosen location that cannot become a filesystem path is a real
+        // failure, not a cancel — report it as such.
+        Some(p) => p
+            .into_path()
+            .map_err(|e| format!("cannot use chosen save location: {e}"))?,
+    };
+    std::fs::write(&path, &plist).map_err(|e| format!("cannot write {}: {e}", path.display()))?;
+    Ok(path.display().to_string())
 }
 
 // ---------------------------------------------------------------------------
@@ -216,7 +271,7 @@ async fn install_ipa(
         // No 2FA bridge was armed on this path; nothing to clear.
         return match result {
             Ok(()) => {
-                push_pairing_best_effort(udid.as_deref()).await;
+                push_pairing_report(&app, udid.as_deref()).await;
                 emit_stage(&app, "done_cert", None);
                 Ok("installed".to_string())
             }
@@ -279,7 +334,7 @@ async fn install_ipa(
     clear_pending(&pending);
     match result {
         Ok(()) => {
-            push_pairing_best_effort(install_opts.udid.as_deref()).await;
+            push_pairing_report(&app, install_opts.udid.as_deref()).await;
             emit_stage(&app, "done", None);
             Ok("installed".to_string())
         }
@@ -323,6 +378,8 @@ fn main() {
             list_devices,
             list_certs,
             install_ipa,
+            push_pairing,
+            export_pairing,
             twofa_answer
         ])
         .run(tauri::generate_context!())

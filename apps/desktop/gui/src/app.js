@@ -10,6 +10,7 @@
   var devicesCache = [];
   var certsCache = [];
   var lastStage = null;   // {stage, detail} — re-rendered on language change
+  var lastPairing = null; // {ok, error?} — outcome of the pairing push, re-rendered on language change
   var lastMethod = "apple_id"; // signing method used by the running install
   var twofaPrompt = null; // last 2FA prompt DTO — re-rendered on language change
 
@@ -41,6 +42,7 @@
     renderDeviceOptions();
     renderCertOptions();
     renderStage();
+    renderPairing();
     if (twofaPrompt) renderTwofa();
   }
 
@@ -223,7 +225,9 @@
     btn.disabled = true;
     setMsg("", "hint");
     lastStage = null;
+    lastPairing = null;
     renderStage();
+    renderPairing();
 
     // Single struct arg: Tauri matches it by parameter name (`req`).
     core.invoke("install_ipa", { req: req }).catch(function (e) {
@@ -242,9 +246,20 @@
     var el = $("progress");
     var s = stage || lastStage;
     if (!s) { el.hidden = true; return; }
+    if (s.stage === "pairing_pushed") {
+      lastPairing = { ok: true };
+      renderPairing();
+      return;
+    }
+    if (s.stage === "pairing_failed") {
+      lastPairing = { ok: false, error: s.detail || "" };
+      renderPairing();
+      return;
+    }
     if (s.stage === "done" || s.stage === "done_cert") {
       el.hidden = true;
       setMsg(t(lastMethod === "cert" ? "install.success_cert" : "install.success"), "ok");
+      renderPairing();
       return;
     }
     if (s.stage === "error") {
@@ -256,6 +271,70 @@
     setMsg("", "hint");
     if (s.stage === "login") el.textContent = t("install.stage_login", { id: s.detail || "" });
     else if (s.stage === "signing") el.textContent = t("install.stage_signing");
+  }
+
+  // ---- pairing file ----
+  // After a successful install the backend pushes the pairing file to the
+  // phone and reports the outcome as pairing_pushed / pairing_failed stages.
+  // The box below lets the user retry the push or export the file (save
+  // dialog) without reinstalling — and without a terminal.
+
+  function selectedUdid() {
+    var v = $("target_device").value;
+    return v ? v : null;
+  }
+
+  function setPairingMsg(text, cls) {
+    var el = $("pairing_msg");
+    el.textContent = text || "";
+    el.className = cls || "hint";
+  }
+
+  function renderPairing() {
+    var box = $("pairing_box");
+    if (!box) return;
+    if (!lastPairing) { box.hidden = true; return; }
+    box.hidden = false;
+    var st = $("pairing_status");
+    if (lastPairing.ok) {
+      st.textContent = t("pairing.pushed");
+      st.className = "ok";
+    } else {
+      st.textContent = t("pairing.push_failed", { msg: lastPairing.error || "" });
+      st.className = "err";
+    }
+  }
+
+  function onPushPairing() {
+    var core = tauriCore();
+    if (!core) { setPairingMsg(t("install.no_dialog"), "err"); return; }
+    var btn = $("push_pairing");
+    btn.disabled = true;
+    setPairingMsg(t("pairing.pushing"), "hint");
+    core.invoke("push_pairing", { udid: selectedUdid() }).then(function () {
+      lastPairing = { ok: true };
+      renderPairing();
+      setPairingMsg("", "hint");
+    }).catch(function (e) {
+      lastPairing = { ok: false, error: String((e && e.message) || e) };
+      renderPairing();
+      setPairingMsg("", "hint");
+    }).finally(function () { btn.disabled = false; });
+  }
+
+  function onExportPairing() {
+    var core = tauriCore();
+    if (!core) { setPairingMsg(t("install.no_dialog"), "err"); return; }
+    var btn = $("export_pairing");
+    btn.disabled = true;
+    setPairingMsg(t("pairing.exporting"), "hint");
+    core.invoke("export_pairing", { udid: selectedUdid() }).then(function (path) {
+      setPairingMsg(t("pairing.exported", { path: path }), "ok");
+    }).catch(function (e) {
+      var msg = String((e && e.message) || e);
+      // Cancelling the save dialog is not an error.
+      setPairingMsg(msg === "save cancelled" ? "" : t("pairing.export_failed", { msg: msg }), msg === "save cancelled" ? "hint" : "err");
+    }).finally(function () { btn.disabled = false; });
   }
 
   // ---- 2FA dialog ----
@@ -326,6 +405,8 @@
   $("refresh").addEventListener("click", refreshDevices);
   $("browse").addEventListener("click", onBrowse);
   $("do_install").addEventListener("click", onInstall);
+  $("push_pairing").addEventListener("click", onPushPairing);
+  $("export_pairing").addEventListener("click", onExportPairing);
   $("sign_method").addEventListener("change", onMethodChange);
   $("twofa_submit").addEventListener("click", function () {
     answerTwofa({ kind: "code", code: $("twofa_code").value.trim() });

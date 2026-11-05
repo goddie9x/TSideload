@@ -10,6 +10,8 @@
 //!
 //! Everything here is best-effort: pushing must never fail an install.
 
+use std::time::Duration;
+
 use idevice::provider::{IdeviceProvider, UsbmuxdProvider};
 use idevice::services::afc::opcode::AfcFopenMode;
 use idevice::services::house_arrest::HouseArrestClient;
@@ -72,9 +74,33 @@ pub async fn push_pairing_file(provider: &UsbmuxdProvider) -> Result<()> {
 
 /// Convenience for CLI/GUI callers, which don't hold a provider:
 /// resolve the device, then push. See [`push_pairing_file`].
+///
+/// Retries the whole push (3 attempts, ~2s apart): the app container may
+/// not be ready immediately after install, so a first attempt can fail
+/// even though a later one succeeds. Returns the last error when every
+/// attempt fails, so the caller can show the actual failure reason.
 pub async fn push_pairing_for_udid(udid: Option<&str>) -> Result<()> {
-    let provider = crate::devices::find_provider(udid).await?;
-    push_pairing_file(&provider).await
+    const PUSH_ATTEMPTS: u32 = 3;
+    const PUSH_RETRY_DELAY: Duration = Duration::from_secs(2);
+
+    let mut last_err = None;
+    for attempt in 1..=PUSH_ATTEMPTS {
+        let outcome = async {
+            let provider = crate::devices::find_provider(udid).await?;
+            push_pairing_file(&provider).await
+        }
+        .await;
+        match outcome {
+            Ok(()) => return Ok(()),
+            Err(e) => {
+                last_err = Some(e);
+                if attempt < PUSH_ATTEMPTS {
+                    tokio::time::sleep(PUSH_RETRY_DELAY).await;
+                }
+            }
+        }
+    }
+    Err(last_err.expect("at least one push attempt ran"))
 }
 
 /// Convenience for the `export-pairing` command: fetch + serialize,
